@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.couponRoutes = void 0;
+const express_1 = require("express");
+const validateRequest_1 = require("../../middleware/validateRequest");
+const coupon_validation_1 = require("./coupon.validation");
+const coupon_controller_1 = require("./coupon.controller");
+const router = (0, express_1.Router)();
+router.post("/", (0, validateRequest_1.validateRequest)(coupon_validation_1.couponSchema), coupon_controller_1.addCoupon);
+exports.couponRoutes = router;

@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.enrollmentRoutes = void 0;
+const express_1 = require("express");
+const validateRequest_1 = require("../../middleware/validateRequest");
+const enrollment_validation_1 = require("./enrollment.validation");
+const enrollment_controller_1 = require("./enrollment.controller");
+const router = (0, express_1.Router)();
+router.post("/", (0, validateRequest_1.validateRequest)(enrollment_validation_1.enrollmentSchema), enrollment_controller_1.enrollUser);
+exports.enrollmentRoutes = router;

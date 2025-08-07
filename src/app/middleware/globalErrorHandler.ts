@@ -1,13 +1,8 @@
 import type { Request, Response, NextFunction, ErrorRequestHandler } from "express"
-import {
-  PrismaClientInitializationError,
-  PrismaClientKnownRequestError,
-  PrismaClientRustPanicError,
-  PrismaClientUnknownRequestError,
-  PrismaClientValidationError,
-} from "@prisma/client/runtime/library"
+
 import { ZodError } from "zod"
 import { AppError } from "../error/AppError"
+import { PrismaClientInitializationError, PrismaClientKnownRequestError, PrismaClientRustPanicError, PrismaClientUnknownRequestError, PrismaClientValidationError } from "../../../generated/prisma/runtime/library"
 
 // ====================
 // Global Error Handler Middleware
