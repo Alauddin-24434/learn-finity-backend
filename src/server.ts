@@ -42,7 +42,7 @@ app.use(express.urlencoded({ extended: true }))
  * 🔄 Routes
  */
 app.get("/", (req, res) => {
-  res.json({ status: "OK", message: "Akademi Backend is running!" })
+  res.json({ status: "OK", message: "Elearning platform is running!" })
 })
 
 // API entry
