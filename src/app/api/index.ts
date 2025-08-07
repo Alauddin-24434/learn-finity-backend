@@ -5,7 +5,6 @@ import { paymentRoutes } from "../modules/Payment/payment.route"
 
 import { userRoutes } from "../modules/User/user.routes"
 
-import { dashboardRoutes } from "../modules/Dashboard/overview.route"
 import { courseRoutes } from "../modules/Course/course.routes"
 import { lessonRoutes } from "../modules/Lession/lession.route"
 import { categoryRoutes } from "../modules/Category/category.route"
@@ -46,10 +45,7 @@ const moduleRoutes = [
     path: "/api/usecoupons",
     route: useCouponRoutes,
   },
-  {
-    path: "/api/dashboards",
-    route: dashboardRoutes,
-  },
+ 
 
   {
     path: "/api/payments",
