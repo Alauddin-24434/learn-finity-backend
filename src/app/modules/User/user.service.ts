@@ -10,71 +10,13 @@ import { prisma } from "../../lib/prisma";
 
 
 // 2. Get All Users
-const getAllUsers = async (query: any, isAdmin: boolean) => {
-  const page = Number.parseInt(query.page || "1");
-  const limit = Number.parseInt(query.limit || "10");
-  const skip = (page - 1) * limit;
+const getAllUsers = async () => {
 
-  // Search Filter
-  const searchFilter = query.search
-    ? {
-      OR: [
-        { name: { contains: query.search, mode: "insensitive" as const } },
-        { email: { contains: query.search, mode: "insensitive" as const } },
-      ],
-    }
-    : {};
+    const user = await prisma.user.findMany();
+ 
+ return user;
 
-  // Role Filter Logic
-  let roleFilter: any = {};
-  if (isAdmin) {
-    roleFilter = {
-      role: {
-        in: ["GUEST", "STUDENT"],
-      },
-    };
-  } else if (!isAdmin) {
-    // যদি SUPER_ADMIN না হয় এবং ADMIN না হয়, ফাঁকা রিটার্ন দাও
-    return {
-      data: [],
-      pagination: {
-        page,
-        limit,
-        total: 0,
-        totalPages: 0,
-        hasNext: false,
-        hasPrev: false,
-      },
-    };
-  }
-
-  const where = {
-    ...searchFilter,
-    ...roleFilter,
-  };
-
-  // Query Run
-  const [users, total] = await Promise.all([
-    prisma.user.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.user.count({ where }),
-  ]);
-
-  return {
-    data: users,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-      hasNext: page < Math.ceil(total / limit),
-      hasPrev: page > 1,
-    },
-  };
+  
 };
 
 

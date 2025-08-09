@@ -12,12 +12,9 @@ import { catchAsyncHandler } from "../../utils/catchAsyncHandler";
 
 // =============================================================Get all user==============================================
 const getAllUsers = catchAsyncHandler(async (req: Request, res: Response) => {
-  const isAdmin = req.user?.isAdmin;
-  if (!isAdmin) {
-    return res.status(403).json({ message: "Forbidden: Admins only" })
-  }
+ 
 
-  const result = await userService.getAllUsers(req.query, isAdmin);
+  const result = await userService.getAllUsers();
 
   const response = {
     success: true,

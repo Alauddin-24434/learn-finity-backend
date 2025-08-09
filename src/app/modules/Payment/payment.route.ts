@@ -12,6 +12,7 @@ router.post('/initiate', validateRequest(paymentSchema), paymentController.initi
 router.post('/success', paymentController.paymentSuccess)
 router.post('/fail', paymentController.paymentFail)
 router.get('/cancel', paymentController.paymentCancel)
+router.get('/', paymentController.getAllPayments)
 
 
 export const paymentRoutes = router

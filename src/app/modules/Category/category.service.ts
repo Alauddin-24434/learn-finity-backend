@@ -14,3 +14,15 @@ export const createCategory = async (name: string) => {
 
   return category;
 };
+
+
+
+export const getAllCategoriesInDb = async () => {
+  // Check if category already exists
+  const category = await prisma.category.findMany();
+
+
+ 
+
+  return category;
+};

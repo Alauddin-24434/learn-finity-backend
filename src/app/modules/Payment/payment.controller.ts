@@ -66,10 +66,10 @@ const paymentCancel = catchAsyncHandler(async (req: Request, res: Response) => {
 
 //==================== Get All Payments =========================//
 // This endpoint retrieves all payment records from the database.
-// const getAllPayments = catchAsyncHandler(async (req: Request, res: Response) => {
-//   const payments = await paymentService.();
-//   res.status(200).json({ success: true, data: payments });
-// });
+const getAllPayments = catchAsyncHandler(async (req: Request, res: Response) => {
+  const payments = await paymentService.getAllPayments();
+  res.status(200).json({ success: true, data: payments });
+});
 
 
 
@@ -78,5 +78,6 @@ export const paymentController = {
   paymentCancel,
   paymentFail,
   paymentSuccess,
+  getAllPayments
 
 }

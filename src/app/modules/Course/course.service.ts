@@ -29,10 +29,12 @@ const getCourseById = async (id: string) => {
 
 const getAllCourses = async () => {
   return prisma.course.findMany({
-    where: { },
+    where: {},
     include: {
       author: true,
       category: true,
+      lessons: true,
+      enrollments: true,
     },
   });
 };

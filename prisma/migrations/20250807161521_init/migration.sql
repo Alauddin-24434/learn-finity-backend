@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "public"."PaymentStatus" AS ENUM ('PENDING', 'PAID', 'FAILED', 'CANCELLED');
+
 -- CreateTable
 CREATE TABLE "public"."User" (
     "id" TEXT NOT NULL,
@@ -26,14 +29,16 @@ CREATE TABLE "public"."Course" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "videoPreview" TEXT,
+    "thumbnail" TEXT,
     "price" INTEGER NOT NULL DEFAULT 0,
     "isFree" BOOLEAN NOT NULL DEFAULT false,
     "authorId" TEXT NOT NULL,
     "categoryId" TEXT NOT NULL,
+    "features" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "overviews" TEXT[] DEFAULT ARRAY[]::TEXT[],
+    "stack" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "couponId" TEXT,
 
     CONSTRAINT "Course_pkey" PRIMARY KEY ("id")
 );
@@ -67,10 +72,11 @@ CREATE TABLE "public"."Payment" (
     "userId" TEXT NOT NULL,
     "courseId" TEXT NOT NULL,
     "amount" INTEGER NOT NULL,
-    "currency" TEXT NOT NULL DEFAULT 'USD',
-    "status" TEXT NOT NULL,
+    "currency" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
+    "status" "public"."PaymentStatus" NOT NULL DEFAULT 'PENDING',
     "provider" TEXT NOT NULL,
-    "transactionId" TEXT,
+    "transactionId" TEXT NOT NULL,
     "paidAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
@@ -99,6 +105,18 @@ CREATE TABLE "public"."CouponUsage" (
 );
 
 -- CreateTable
+CREATE TABLE "public"."Review" (
+    "id" TEXT NOT NULL,
+    "courseId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "score" INTEGER NOT NULL,
+    "comment" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Review_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "public"."_CouponCourses" (
     "A" TEXT NOT NULL,
     "B" TEXT NOT NULL,
@@ -111,6 +129,9 @@ CREATE UNIQUE INDEX "User_email_key" ON "public"."User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Category_name_key" ON "public"."Category"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Payment_transactionId_key" ON "public"."Payment"("transactionId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Coupon_code_key" ON "public"."Coupon"("code");
@@ -144,6 +165,12 @@ ALTER TABLE "public"."CouponUsage" ADD CONSTRAINT "CouponUsage_userId_fkey" FORE
 
 -- AddForeignKey
 ALTER TABLE "public"."CouponUsage" ADD CONSTRAINT "CouponUsage_couponId_fkey" FOREIGN KEY ("couponId") REFERENCES "public"."Coupon"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."Review" ADD CONSTRAINT "Review_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "public"."Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."Review" ADD CONSTRAINT "Review_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."_CouponCourses" ADD CONSTRAINT "_CouponCourses_A_fkey" FOREIGN KEY ("A") REFERENCES "public"."Coupon"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -15,25 +9,26 @@ datasource db {
 }
 
 model User {
-  id                String        @id @default(cuid())
+  id                String         @id @default(cuid())
   name              String
-  email             String        @unique
+  email             String         @unique
   password          String
   avatar            String?
-  isAdmin           Boolean       @default(false)
-  isActive          Boolean       @default(true)
-  coursesCreated    Course[]      @relation("CreatedCourses")
-  courseEnrollments Enrollment[] // Courses the user enrolled in
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  Payment           Payment[]
-  CouponUsage       CouponUsage[]
+  isAdmin           Boolean        @default(false)
+  isActive          Boolean        @default(true)
+  coursesCreated    Course[]       @relation("CreatedCourses")
+  courseEnrollments Enrollment[]
+  payments          Payment[]
+  couponUsages      CouponUsage[]
+  reviews           Review[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }
 
 model Category {
-  id      String   @id @default(cuid())
-  name    String   @unique
-  courses Course[]
+  id        String   @id @default(cuid())
+  name      String   @unique
+  courses   Course[]
 }
 
 model Course {
@@ -43,17 +38,25 @@ model Course {
   thumbnail   String?
   price       Int          @default(0)
   isFree      Boolean      @default(false)
+
   authorId    String
   author      User         @relation("CreatedCourses", fields: [authorId], references: [id])
+
   categoryId  String
   category    Category     @relation(fields: [categoryId], references: [id])
+
   lessons     Lesson[]
   enrollments Enrollment[]
+  payments    Payment[]
+  coupons     Coupon[]     @relation("CouponCourses")
+  reviews     Review[]
+
+  features    String[]     @default([])
+  overviews   String[]     @default([])
+  stack       String[]     @default([])
+
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-  Payment     Payment[]
-  coupons     Coupon[]     @relation("CouponCourses")
-  couponId    String?
 }
 
 model Lesson {
@@ -80,13 +83,14 @@ model Payment {
   id            String        @id @default(cuid())
   userId        String
   courseId      String
-  amount        Int // in cents if using Stripe or other providers
+  amount        Int
   currency      String
   phone         String
   status        PaymentStatus @default(PENDING)
-  provider      String // e.g. "stripe", "paypal", etc.
-  transactionId String        @unique // transaction ID from payment gateway
+  provider      String
+  transactionId String        @unique
   paidAt        DateTime      @default(now())
+
   user          User          @relation(fields: [userId], references: [id])
   course        Course        @relation(fields: [courseId], references: [id])
 }
@@ -99,17 +103,29 @@ model Coupon {
   isActive    Boolean       @default(true)
   createdAt   DateTime      @default(now())
   courses     Course[]      @relation("CouponCourses")
-  CouponUsage CouponUsage[]
+  usages      CouponUsage[]
 }
 
 model CouponUsage {
-  id       String   @id @default(cuid())
-  userId   String
-  couponId String
-  usedAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  couponId  String
+  usedAt    DateTime @default(now())
 
-  user   User   @relation(fields: [userId], references: [id])
-  coupon Coupon @relation(fields: [couponId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  coupon    Coupon   @relation(fields: [couponId], references: [id])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  courseId  String
+  userId    String
+  score     Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  course    Course   @relation(fields: [courseId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 enum PaymentStatus {
