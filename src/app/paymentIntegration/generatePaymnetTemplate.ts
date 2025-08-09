@@ -148,7 +148,7 @@ export const generatePaymentHtml = (
         <div class="emoji">${emoji}</div>
         <h1>${title}</h1>
         <p>${message}</p>
-        <a class="button" href="https://academi-one.vercel.app/dashboard">⬅️ Back to Home</a>
+        <a class="button" href="https://elearning-platform-phi.vercel.app">⬅️ Back to Home</a>
       </div>
     </body>
     </html>
