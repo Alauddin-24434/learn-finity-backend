@@ -44,17 +44,11 @@ const registerUser = (userData) => __awaiter(void 0, void 0, void 0, function* (
             email: userData.email,
             password: hashedPassword,
         },
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            avatar: true,
-            isAdmin: true
-        },
     });
     return user;
 });
 const loginUser = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log(loginData);
     // Step 1: Find user by email and include password
     const user = yield prisma_1.prisma.user.findUnique({
         where: { email: loginData.email },
@@ -66,14 +60,16 @@ const loginUser = (loginData) => __awaiter(void 0, void 0, void 0, function* () 
             password: true, // include password for comparison
         },
     });
+    console.log("user", user);
     if (!user) {
-        throw new AppError_1.AppError(401, "Invalid email or password");
+        throw new AppError_1.AppError(400, "Invalid email or password");
     }
     // Step 2: Compare password
     const isPasswordMatched = yield bcryptjs_1.default.compare(loginData.password, user.password);
     if (!isPasswordMatched) {
-        throw new AppError_1.AppError(401, "Invalid email or password");
+        throw new AppError_1.AppError(400, "Invalid email or password");
     }
+    console.log("pass", isPasswordMatched);
     // Step 3: Remove password before returning user
     const { password } = user, userWithoutPassword = __rest(user, ["password"]);
     return userWithoutPassword;

@@ -46,17 +46,72 @@ const getCourseById = async (id: string) => {
   return course;
 };
 
-const getAllCourses = async () => {
-  return prisma.course.findMany({
-    where: {},
+
+const getAllCourses = async (query:any) => {
+ 
+  let { category, searchTerm, sort, page, limit } = query;
+
+  page = parseInt(page, 10);
+  limit = parseInt(limit, 10);
+
+  const pageNumber = Number.isNaN(page) || page < 1 ? 1 : page;
+  const limitNumber = Number.isNaN(limit) || limit < 1 ? 6 : limit;
+  const skip = (pageNumber - 1) * limitNumber;
+
+  const where: any = {};
+
+  if (category) {
+    where.category = {
+      name: {
+        contains: category,
+        mode: "insensitive",
+      },
+    };
+  }
+
+  if (searchTerm) {
+    where.OR = [
+      { title: { contains: searchTerm, mode: "insensitive" } },
+      // { stack: { contains: searchTerm, mode: "insensitive" } },
+      { description: { contains: searchTerm, mode: "insensitive" } },
+    ];
+  }
+
+  let orderBy = {};
+  if (sort === "price-asc") orderBy = { price: "asc" };
+  else if (sort === "price-desc") orderBy = { price: "desc" };
+  else orderBy = { createdAt: "desc" };
+
+  // get total count for pagination
+  const totalCourses = await prisma.course.count({ where });
+
+  // get courses list
+  const courses = await prisma.course.findMany({
+    where,
     include: {
       author: true,
       category: true,
       lessons: true,
       enrollments: true,
     },
+    orderBy,
+    skip,
+    take: limitNumber,
   });
+
+  const totalPages = Math.ceil(totalCourses / limitNumber);
+
+  return {
+    courses,
+    totalPages,
+    currentPage: pageNumber,
+    totalCourses,
+  };
 };
+
+
+
+
 
 const updateCourseById = async (id: string, data: Partial<ICourse>) => {
   const course = await prisma.course.findUnique({ where: { id } });

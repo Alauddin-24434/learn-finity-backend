@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createCategoryHandler = void 0;
+exports.getAllCategories = exports.createCategoryHandler = void 0;
 const category_service_1 = require("./category.service");
+const catchAsyncHandler_1 = require("../../utils/catchAsyncHandler");
 const createCategoryHandler = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name } = req.body;
@@ -25,3 +26,12 @@ const createCategoryHandler = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.createCategoryHandler = createCategoryHandler;
+exports.getAllCategories = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield (0, category_service_1.getAllCategoriesInDb)();
+    const response = {
+        success: true,
+        message: "Categories retrieved successfully",
+        data: result,
+    };
+    res.json(response);
+}));

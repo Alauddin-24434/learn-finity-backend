@@ -24,8 +24,8 @@ const generateTransactionId = () => {
 const initiatePayment = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const transactionId = generateTransactionId();
     const bodyData = Object.assign(Object.assign({}, req.body), { transactionId });
-    const payment = yield payment_service_1.paymentService.initiatePaymentInDb(bodyData);
-    const { payment_url } = payment;
+    const paymentInitiateResult = yield payment_service_1.paymentService.initiatePaymentInDb(bodyData);
+    const { payment_url } = paymentInitiateResult;
     res.status(201).json({ success: true, url: payment_url });
 }));
 //==================== Payment Success Callback =========================//
@@ -60,13 +60,14 @@ const paymentCancel = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => _
 // });
 //==================== Get All Payments =========================//
 // This endpoint retrieves all payment records from the database.
-// const getAllPayments = catchAsyncHandler(async (req: Request, res: Response) => {
-//   const payments = await paymentService.();
-//   res.status(200).json({ success: true, data: payments });
-// });
+const getAllPayments = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const payments = yield payment_service_1.paymentService.getAllPayments();
+    res.status(200).json({ success: true, data: payments });
+}));
 exports.paymentController = {
     initiatePayment,
     paymentCancel,
     paymentFail,
     paymentSuccess,
+    getAllPayments
 };

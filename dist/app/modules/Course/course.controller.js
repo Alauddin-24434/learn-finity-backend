@@ -14,8 +14,8 @@ const catchAsyncHandler_1 = require("../../utils/catchAsyncHandler");
 const course_service_1 = require("./course.service");
 const createCourse = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const thumbnail = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path;
-    const bodyData = Object.assign(Object.assign({}, req.body), { thumbnail });
+    const thumbnailUrl = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path; // Cloudinary UR
+    const bodyData = Object.assign(Object.assign({}, req.body), { thumbnail: thumbnailUrl });
     const course = yield course_service_1.courseService.createCourse(bodyData);
     res.status(201).json({ status: "success", data: course });
 }));
@@ -24,7 +24,9 @@ const getCourseById = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => _
     res.status(200).json({ status: "success", data: course });
 }));
 const getAllCourses = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const courses = yield course_service_1.courseService.getAllCourses();
+    const query = req.query;
+    console.log("b", query);
+    const courses = yield course_service_1.courseService.getAllCourses(query);
     res.status(200).json({ status: "success", data: courses });
 }));
 const updateCourseById = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

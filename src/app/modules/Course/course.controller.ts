@@ -13,6 +13,7 @@ const createCourse = catchAsyncHandler(async (req: Request, res: Response) => {
   }
 
 
+
   const course = await courseService.createCourse(bodyData);
 
   res.status(201).json({ status: "success", data: course });
@@ -24,12 +25,17 @@ const getCourseById = catchAsyncHandler(async (req: Request, res: Response) => {
 });
 
 const getAllCourses = catchAsyncHandler(async (req: Request, res: Response) => {
-  const courses = await courseService.getAllCourses();
+ 
+  const query= req.query;
+  console.log("b",query)
+  const courses = await courseService.getAllCourses(query);
+
   res.status(200).json({ status: "success", data: courses });
 });
 
 const updateCourseById = catchAsyncHandler(async (req: Request, res: Response) => {
   const course = await courseService.updateCourseById(req.params.id, req.body);
+
   res.status(200).json({ status: "success", data: course });
 });
 

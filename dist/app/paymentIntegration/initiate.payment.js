@@ -34,6 +34,7 @@ const initiatePayment = (_a) => __awaiter(void 0, [_a], void 0, function* ({ nam
         type: "json",
     };
     const response = yield axios_1.default.post("https://sandbox.aamarpay.com/jsonpost.php", payload);
+    console.log("response", response);
     return response.data;
 });
 exports.initiatePayment = initiatePayment;

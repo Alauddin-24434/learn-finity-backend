@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createCategory = void 0;
+exports.getAllCategoriesInDb = exports.createCategory = void 0;
 const prisma_1 = require("../../lib/prisma");
 const createCategory = (name) => __awaiter(void 0, void 0, void 0, function* () {
     // Check if category already exists
@@ -24,3 +24,9 @@ const createCategory = (name) => __awaiter(void 0, void 0, void 0, function* () 
     return category;
 });
 exports.createCategory = createCategory;
+const getAllCategoriesInDb = () => __awaiter(void 0, void 0, void 0, function* () {
+    // Check if category already exists
+    const category = yield prisma_1.prisma.category.findMany();
+    return category;
+});
+exports.getAllCategoriesInDb = getAllCategoriesInDb;

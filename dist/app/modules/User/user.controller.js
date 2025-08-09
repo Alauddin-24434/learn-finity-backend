@@ -17,12 +17,7 @@ const user_schema_1 = require("./user.schema");
 const catchAsyncHandler_1 = require("../../utils/catchAsyncHandler");
 // =============================================================Get all user==============================================
 const getAllUsers = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const isAdmin = (_a = req.user) === null || _a === void 0 ? void 0 : _a.isAdmin;
-    if (!isAdmin) {
-        return res.status(403).json({ message: "Forbidden: Admins only" });
-    }
-    const result = yield user_service_1.userService.getAllUsers(req.query, isAdmin);
+    const result = yield user_service_1.userService.getAllUsers();
     const response = {
         success: true,
         message: "Users retrieved successfully",

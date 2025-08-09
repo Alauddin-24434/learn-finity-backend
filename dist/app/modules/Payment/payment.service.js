@@ -18,33 +18,33 @@ const verifyPayment_1 = require("../../paymentIntegration/verifyPayment");
 const initiatePaymentInDb = (paymentData) => __awaiter(void 0, void 0, void 0, function* () {
     const { amount, userId, transactionId, provider, courseId, currency, phone } = paymentData;
     try {
-        const result = yield prisma_1.prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
-            const user = yield tx.user.findFirst({ where: { id: userId } });
-            if (!user)
-                throw new AppError_1.AppError(404, "User not found");
-            const pay = yield tx.payment.create({
-                data: {
-                    amount,
-                    userId,
-                    transactionId,
-                    provider,
-                    courseId,
-                    currency,
-                    status: "PENDING",
-                    phone,
-                },
-            });
-            const paymentInitiateResult = yield (0, initiate_payment_1.initiatePayment)({
-                name: user.name,
-                email: user.email,
-                phone,
+        // প্রথমে ডাটাবেসে পেমেন্ট রেকর্ড তৈরি
+        const user = yield prisma_1.prisma.user.findFirst({ where: { id: userId } });
+        if (!user)
+            throw new AppError_1.AppError(404, "User not found");
+        yield prisma_1.prisma.payment.create({
+            data: {
                 amount,
+                userId,
                 transactionId,
+                provider,
+                courseId,
                 currency,
-            });
-            return paymentInitiateResult;
-        }));
-        return result;
+                status: "PENDING",
+                phone,
+            },
+        });
+        // তারপর পেমেন্ট ইনিশিয়েট করুন (ট্রানজেকশনের বাইরে)
+        const paymentInitiateResult = yield (0, initiate_payment_1.initiatePayment)({
+            name: user.name,
+            email: user.email,
+            phone,
+            amount,
+            transactionId,
+            currency,
+        });
+        // console.log("paymentInitiateResult",paymentInitiateResult)
+        return paymentInitiateResult;
     }
     catch (error) {
         console.error("❌ Payment initiation failed:", error);

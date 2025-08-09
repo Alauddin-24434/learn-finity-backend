@@ -8,4 +8,5 @@ const express_1 = __importDefault(require("express"));
 const category_controller_1 = require("./category.controller");
 const router = express_1.default.Router();
 router.post("/", category_controller_1.createCategoryHandler); // POST /api/categories
+router.get("/", category_controller_1.getAllCategories); // POST /api/categories
 exports.categoryRoutes = router;
