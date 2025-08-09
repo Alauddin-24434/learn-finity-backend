@@ -7,11 +7,30 @@ import { ICourse } from "./course.interface";
 
 const createCourse = async (data: ICourse) => {
   const exists = await prisma.course.findFirst({
-    where: { title: data.title },
+    where: { 
+      title: data.title,
+      authorId: data.authorId,  
+    },
   });
-  if (exists) throw new AppError(400, "Course with this title already exists");
-  return prisma.course.create({ data });
+
+  if (exists) throw new AppError(400, "Course with this title already exists for this author");
+
+  return prisma.course.create({
+    data: {
+      title: data.title,
+      thumbnail: data.thumbnail,
+      price: Number(data.price),
+      isFree: Boolean(data.isFree),
+      description: data.description,
+      authorId: data.authorId,
+      categoryId: data.categoryId,
+      features: data.features,
+      stack: data.stack,
+      overviews: data.overviews
+    }
+  });
 };
+
 
 const getCourseById = async (id: string) => {
   const course = await prisma.course.findUnique({

@@ -24,13 +24,6 @@ const registerUser = async (userData: IRegisterUser) => {
       email: userData.email,
       password: hashedPassword,
     },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      avatar: true,
-      isAdmin: true
-    },
   })
 
   return user;
@@ -40,6 +33,7 @@ const registerUser = async (userData: IRegisterUser) => {
 
 
 export const loginUser = async (loginData: ILoginUser) => {
+  console.log(loginData)
   // Step 1: Find user by email and include password
   const user = await prisma.user.findUnique({
     where: { email: loginData.email },
@@ -51,17 +45,17 @@ export const loginUser = async (loginData: ILoginUser) => {
       password: true, // include password for comparison
     },
   });
-
+console.log("user",user)
   if (!user) {
-    throw new AppError(401, "Invalid email or password");
+    throw new AppError(400, "Invalid email or password");
   }
 
   // Step 2: Compare password
   const isPasswordMatched = await bcrypt.compare(loginData.password, user.password);
   if (!isPasswordMatched) {
-    throw new AppError(401, "Invalid email or password");
+    throw new AppError(400, "Invalid email or password");
   }
-
+console.log("pass",isPasswordMatched)
   // Step 3: Remove password before returning user
   const { password, ...userWithoutPassword } = user;
   return userWithoutPassword;

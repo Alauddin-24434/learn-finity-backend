@@ -48,6 +48,7 @@ export const initiatePayment = async ({
   };
 
   const response = await axios.post("https://sandbox.aamarpay.com/jsonpost.php", payload);
+  console.log("response",response)
 
   return response.data;
 };

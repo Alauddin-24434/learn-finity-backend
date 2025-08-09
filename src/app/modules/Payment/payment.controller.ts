@@ -24,8 +24,10 @@ const initiatePayment = catchAsyncHandler(async (req: Request, res: Response) =>
 
   
 
-  const payment = await paymentService.initiatePaymentInDb(bodyData);
-  const { payment_url } = payment;
+  const paymentInitiateResult = await paymentService.initiatePaymentInDb(bodyData);
+
+  const { payment_url } = paymentInitiateResult;
+
 
   res.status(201).json({ success: true, url: payment_url });
 });

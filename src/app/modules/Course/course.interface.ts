@@ -8,7 +8,12 @@ export interface ICourse {
   isFree: boolean;
   authorId: string;
   categoryId: string;
-  couponId?: string;
+ 
   createdAt: string;
   updatedAt: string;
+    features: string[];
+    overviews: string[];
+    stack: string[];
+    
+
 }

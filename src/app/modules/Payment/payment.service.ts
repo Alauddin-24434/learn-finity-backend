@@ -6,44 +6,44 @@ import { IPaymentInput } from "./payment.interface"
 
 //================ Initiate Payment =================//
 const initiatePaymentInDb = async (paymentData: IPaymentInput) => {
-  const { amount, userId, transactionId, provider, courseId, currency, phone } = paymentData
+  const { amount, userId, transactionId, provider, courseId, currency, phone } = paymentData;
 
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      const user = await tx.user.findFirst({ where: { id: userId } })
-      if (!user) throw new AppError(404, "User not found")
+    // প্রথমে ডাটাবেসে পেমেন্ট রেকর্ড তৈরি
+    const user = await prisma.user.findFirst({ where: { id: userId } });
+    if (!user) throw new AppError(404, "User not found");
 
-      const pay = await tx.payment.create({
-        data: {
-          amount,
-          userId,
-          transactionId,
-          provider,
-          courseId,
-          currency,
-          status: "PENDING",
-          phone,
-        },
-      })
-
-      const paymentInitiateResult = await initiatePayment({
-        name: user.name,
-        email: user.email,
-        phone,
+    await prisma.payment.create({
+      data: {
         amount,
+        userId,
         transactionId,
+        provider,
+        courseId,
         currency,
-      })
+        status: "PENDING",
+        phone,
+      },
+    });
 
-      return paymentInitiateResult
-    })
+    // তারপর পেমেন্ট ইনিশিয়েট করুন (ট্রানজেকশনের বাইরে)
+    const paymentInitiateResult = await initiatePayment({
+      name: user.name,
+      email: user.email,
+      phone,
+      amount,
+      transactionId,
+      currency,
+    });
 
-    return result
+    // console.log("paymentInitiateResult",paymentInitiateResult)
+
+    return paymentInitiateResult;
   } catch (error) {
-    console.error("❌ Payment initiation failed:", error)
-    throw new AppError(500, "Payment initiation failed")
+    console.error("❌ Payment initiation failed:", error);
+    throw new AppError(500, "Payment initiation failed");
   }
-}
+};
 
 //================ Payment Success =================//
 const paymentSuccessInDb = async (transactionId: string) => {

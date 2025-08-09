@@ -6,12 +6,15 @@ import { catchAsyncHandler } from "../../utils/catchAsyncHandler";
 import { courseService } from "./course.service";
 
 const createCourse = catchAsyncHandler(async (req: Request, res: Response) => {
-  const thumbnail= req.file?.path;
-  const bodyData={
+  const thumbnailUrl = req.file?.path; // Cloudinary UR
+  const bodyData = {
     ...req.body,
-    thumbnail
+    thumbnail: thumbnailUrl
   }
+
+
   const course = await courseService.createCourse(bodyData);
+
   res.status(201).json({ status: "success", data: course });
 });
 

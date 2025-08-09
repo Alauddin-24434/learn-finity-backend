@@ -8,7 +8,7 @@ import { upload } from "../../lib/cloudinary";
 
 const router = express.Router();
 
-router.post("/", upload.single("thumbnail"), validateRequest(createCourseZodSchema), courseController.createCourse);
+router.post("/", upload.single("thumbnail"),courseController.createCourse);
 router.get("/", courseController.getAllCourses);
 router.get("/:id", courseController.getCourseById);
 router.patch("/:id", courseController.updateCourseById);
