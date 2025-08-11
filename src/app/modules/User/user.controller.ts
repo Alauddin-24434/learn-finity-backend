@@ -25,10 +25,10 @@ const getAllUsers = catchAsyncHandler(async (req: Request, res: Response) => {
   res.json(response);
 });
 
-//==============================================================Get user byID=================================================
-const getUserById = catchAsyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const user = await userService.getUserById(id);
+
+const getMeById = catchAsyncHandler(async (req: Request, res: Response) => {
+  const id= req.user?.id;
+  const user = await userService.getMe(id as string);
 
   const response = {
     success: true,
@@ -82,8 +82,9 @@ export const userController = {
 
 
   getAllUsers,
-  getUserById,
+
   updateUser,
+  getMeById
 
 
 

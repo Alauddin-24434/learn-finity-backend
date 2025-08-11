@@ -12,27 +12,42 @@ import { prisma } from "../../lib/prisma";
 // 2. Get All Users
 const getAllUsers = async () => {
 
-    const user = await prisma.user.findMany();
- 
- return user;
+  const user = await prisma.user.findMany();
 
-  
+  return user;
+
+
 };
 
 
 // 3. Get User By ID
-const getUserById = async (id: string) => {
+const getMe = async (id: string) => {
   const user = await prisma.user.findUnique({
     where: { id },
-
+    include: {
+      courseEnrollments: {
+        select: { course: true }
+      }
+    }
   });
 
   if (!user) {
     throw new Error("User not found");
   }
 
-  return user;
+  // শুধু course অ্যারে বানানো
+  const courses = user.courseEnrollments.map(e => e.course);
+
+  // courseEnrollments ও password বাদ দিয়ে নতুন অবজেক্ট রিটার্ন
+  const { courseEnrollments, password, ...rest } = user;
+
+  return {
+    ...rest,
+    courses
+  };
 };
+
+
 
 // 4. Update User
 const updateUser = async (id: string, data: any) => {
@@ -71,8 +86,8 @@ const deleteUser = async (id: string) => {
 export const userService = {
 
   getAllUsers,
-  getUserById,
   updateUser,
   deleteUser,
+  getMe
 
 };

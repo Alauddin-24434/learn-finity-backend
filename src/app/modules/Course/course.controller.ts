@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 
 import { catchAsyncHandler } from "../../utils/catchAsyncHandler";
 import { courseService } from "./course.service";
+import { IUser } from "../User/user.interfcae";
 
 const createCourse = catchAsyncHandler(async (req: Request, res: Response) => {
   const thumbnailUrl = req.file?.path; // Cloudinary UR
@@ -27,8 +28,20 @@ const getCourseById = catchAsyncHandler(async (req: Request, res: Response) => {
 const getAllCourses = catchAsyncHandler(async (req: Request, res: Response) => {
  
   const query= req.query;
-  console.log("b",query)
+  
   const courses = await courseService.getAllCourses(query);
+
+  res.status(200).json({ status: "success", data: courses });
+});
+const getMyCourses = catchAsyncHandler(async (req: Request, res: Response) => {
+  const id=req.user?.id;
+  const query= req.query;
+ 
+  const mixup={
+    ...query,
+   id
+  }
+  const courses = await courseService.getMyCourses(mixup);
 
   res.status(200).json({ status: "success", data: courses });
 });
@@ -50,4 +63,5 @@ export const courseController = {
   getAllCourses,
   updateCourseById,
   deleteCourseById,
+  getMyCourses
 };
