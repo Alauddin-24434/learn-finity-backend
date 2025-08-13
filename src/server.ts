@@ -10,7 +10,7 @@ import globalErrorHandler from "./app/middleware/globalErrorHandler"
 
 const app = express()
 const PORT = envVariable.PORT || 5000
-const clientURL = envVariable.CLIENT_URL || "http://localhost:3000"
+// const clientURL = envVariable.CLIENT_URL || "http://localhost:3000"
 
 /**
  * ✅ Middleware Setup (Ordered by priority)
@@ -25,7 +25,7 @@ app.use(helmet())
 // 🌍 3️⃣ CORS
 app.use(
   cors({
-    origin: [clientURL],
+    origin: ["http://localhost:3000","https://elearning-platform-phi.vercel.app"],
     credentials: true,
   }),
 )

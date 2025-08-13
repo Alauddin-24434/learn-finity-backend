@@ -1,15 +1,14 @@
 
 // routes/course.routes.ts
 import express from "express";
-import { validateRequest } from "../../middleware/validateRequest";
-import { createCourseZodSchema } from "./course.validation";
 import { courseController } from "./course.controller";
-import { upload } from "../../lib/cloudinary";
+
 import { authenticate } from "../../middleware/authenticate";
+import { uploadImage } from "../../lib/cloudinary";
 
 const router = express.Router();
 
-router.post("/", upload.single("thumbnail"),courseController.createCourse);
+router.post("/", uploadImage.single("thumbnail"),courseController.createCourse);
 router.get("/", courseController.getAllCourses);
 router.get("/my-courses", authenticate , courseController.getMyCourses);
 router.get("/:id", courseController.getCourseById);

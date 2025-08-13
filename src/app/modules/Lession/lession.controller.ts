@@ -4,7 +4,22 @@ import { createLessonIntoDB, deleteLessonFromDB, getAllLessonsFromDB, getSingleL
 import { sendResponse } from "../../utils/sendResponse"
 
 export const createLesson = catchAsyncHandler(async (req: Request, res: Response) => {
-  const lesson = await createLessonIntoDB(req.body)
+
+
+  const file = req.file as any;
+
+  const videoUrl: string = file.path;
+  const publicId: string = file.filename || file.public_id;
+
+  const body = {
+    ...req.body,
+    videoUrl,
+    publicId,
+
+  }
+  console.log("body", body)
+
+  const lesson = await createLessonIntoDB(body)
   sendResponse(res, {
     statusCode: 201,
     success: true,

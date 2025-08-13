@@ -1,3 +1,6 @@
+// This is the Prisma schema file. It defines your database models and their relationships.
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -8,51 +11,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User model for managing user data and authentication.
 model User {
-  id        String  @id @default(cuid())
-  name      String
-  email     String  @unique
-  password  String
-  avatar    String?
-  isAdmin   Boolean @default(false)
-  isActive  Boolean @default(true)
-  isDeleted Boolean @default(false)
+  id                String       @id @default(cuid())
+  name              String
+  email             String       @unique
+  password          String
+  avatar            String
+  phone             String
+  isAdmin           Boolean      @default(false)
+  isDeleted         Boolean      @default(false)
 
-  coursesCreated    Course[]      @relation("CreatedCourses")
+  // Relationships
+  // A user can create many courses.
+  coursesCreated    Course[]     @relation("CreatedCourses")
+  // A user can enroll in many courses.
   courseEnrollments Enrollment[]
+  // A user can make many payments.
   payments          Payment[]
-  couponUsages      CouponUsage[]
+  // A user can write many reviews.
   reviews           Review[]
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 }
 
+// Category model for organizing courses.
 model Category {
   id        String   @id @default(cuid())
   name      String   @unique
+  // A category can have many courses.
   courses   Course[]
   isDeleted Boolean  @default(false)
 }
 
+// Course model for course details and structure.
 model Course {
-  id          String  @id @default(cuid())
-  title       String
-  description String
-  thumbnail   String?
-  price       Int     @default(0)
-  isFree      Boolean @default(false)
+  id                    String       @id @default(cuid())
+  title                 String
+  description           String
+  thumbnail             String
+  overviewVideo         String
+  overviewVideoPublicId String
+  price                 Int          @default(0)
+  isFree                Boolean      @default(false)
+  categoryId            String
+  authorId              String
 
-  authorId String
-  author   User   @relation("CreatedCourses", fields: [authorId], references: [id])
-
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
-
-  lessons     Lesson[]
-  enrollments Enrollment[]
-  payments    Payment[]
-  coupons     Coupon[]     @relation("CouponCourses")
-  reviews     Review[]
+  // Relationships
+  // A course consists of many lessons.
+  lessons               Lesson[]
+  // A course can have many enrollments.
+  enrollments           Enrollment[]
+  // A course can receive many payments.
+  payments              Payment[]
+  // A course can have many reviews.
+  reviews               Review[]
+  // Relation to the User who created the course.
+  author                User         @relation("CreatedCourses", fields: [authorId], references: [id])
+  // Relation to the course's category.
+  category              Category     @relation(fields: [categoryId], references: [id])
 
   isDeleted Boolean @default(false)
 
@@ -64,28 +81,35 @@ model Course {
   updatedAt DateTime @updatedAt
 }
 
+// Lesson model, which is a part of a course.
 model Lesson {
   id        String   @id @default(cuid())
   title     String
   duration  String
-  videoUrl  String
+  video     String
   courseId  String
+  // Relation to the parent course.
   course    Course   @relation(fields: [courseId], references: [id])
+  publicId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   isDeleted Boolean  @default(false)
 }
 
+// Enrollment model to track which user is enrolled in which course.
 model Enrollment {
-  id         String   @id @default(cuid())
-  userId     String
-  courseId   String
-  user       User     @relation(fields: [userId], references: [id])
-  course     Course   @relation(fields: [courseId], references: [id])
-  enrolledAt DateTime @default(now())
-  isDeleted  Boolean  @default(false)
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  // Relation to the enrolled user.
+  user        User     @relation(fields: [userId], references: [id])
+  // Relation to the enrolled course.
+  course      Course   @relation(fields: [courseId], references: [id])
+  enrolledAt  DateTime @default(now())
+  isDeleted   Boolean  @default(false)
 }
 
+// Payment model to record transaction details.
 model Payment {
   id            String        @id @default(cuid())
   userId        String
@@ -98,47 +122,30 @@ model Payment {
   transactionId String        @unique
   paidAt        DateTime      @default(now())
 
-  user      User    @relation(fields: [userId], references: [id])
-  course    Course  @relation(fields: [courseId], references: [id])
-  isDeleted Boolean @default(false)
+  // Relation to the user who made the payment.
+  user          User          @relation(fields: [userId], references: [id])
+  // Relation to the course being paid for.
+  course        Course        @relation(fields: [courseId], references: [id])
+  isDeleted     Boolean       @default(false)
 }
 
-model Coupon {
-  id        String        @id @default(cuid())
-  code      String        @unique
-  discount  Int
-  expiresAt DateTime
-  isActive  Boolean       @default(true)
-  createdAt DateTime      @default(now())
-  courses   Course[]      @relation("CouponCourses")
-  usages    CouponUsage[]
-  isDeleted Boolean       @default(false)
-}
-
-model CouponUsage {
-  id       String   @id @default(cuid())
-  userId   String
-  couponId String
-  usedAt   DateTime @default(now())
-
-  user      User    @relation(fields: [userId], references: [id])
-  coupon    Coupon  @relation(fields: [couponId], references: [id])
-  isDeleted Boolean @default(false)
-}
-
+// Review model for user feedback on courses.
 model Review {
   id        String   @id @default(cuid())
   courseId  String
   userId    String
-  score     Int
-  comment   String?
+  ratings   Int
+  comment   String
   createdAt DateTime @default(now())
 
-  course    Course  @relation(fields: [courseId], references: [id])
-  user      User    @relation(fields: [userId], references: [id])
-  isDeleted Boolean @default(false)
+  // Relation to the course being reviewed.
+  course    Course   @relation(fields: [courseId], references: [id])
+  // Relation to the user who wrote the review.
+  user      User     @relation(fields: [userId], references: [id])
+  isDeleted Boolean  @default(false)
 }
 
+// Enum for payment statuses.
 enum PaymentStatus {
   PENDING
   PAID

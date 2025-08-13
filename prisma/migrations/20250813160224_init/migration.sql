@@ -7,9 +7,10 @@ CREATE TABLE "public"."User" (
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "avatar" TEXT,
+    "avatar" TEXT NOT NULL,
+    "phone" TEXT NOT NULL,
     "isAdmin" BOOLEAN NOT NULL DEFAULT false,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -20,6 +21,7 @@ CREATE TABLE "public"."User" (
 CREATE TABLE "public"."Category" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
@@ -29,11 +31,14 @@ CREATE TABLE "public"."Course" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "thumbnail" TEXT,
+    "thumbnail" TEXT NOT NULL,
+    "overviewVideo" TEXT NOT NULL,
+    "overviewVideoPublicId" TEXT NOT NULL,
     "price" INTEGER NOT NULL DEFAULT 0,
     "isFree" BOOLEAN NOT NULL DEFAULT false,
-    "authorId" TEXT NOT NULL,
     "categoryId" TEXT NOT NULL,
+    "authorId" TEXT NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
     "features" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "overviews" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "stack" TEXT[] DEFAULT ARRAY[]::TEXT[],
@@ -48,10 +53,12 @@ CREATE TABLE "public"."Lesson" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "duration" TEXT NOT NULL,
-    "videoUrl" TEXT NOT NULL,
+    "video" TEXT NOT NULL,
     "courseId" TEXT NOT NULL,
+    "publicId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Lesson_pkey" PRIMARY KEY ("id")
 );
@@ -62,6 +69,7 @@ CREATE TABLE "public"."Enrollment" (
     "userId" TEXT NOT NULL,
     "courseId" TEXT NOT NULL,
     "enrolledAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Enrollment_pkey" PRIMARY KEY ("id")
 );
@@ -78,30 +86,9 @@ CREATE TABLE "public"."Payment" (
     "provider" TEXT NOT NULL,
     "transactionId" TEXT NOT NULL,
     "paidAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "public"."Coupon" (
-    "id" TEXT NOT NULL,
-    "code" TEXT NOT NULL,
-    "discount" INTEGER NOT NULL,
-    "expiresAt" TIMESTAMP(3) NOT NULL,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Coupon_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "public"."CouponUsage" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "couponId" TEXT NOT NULL,
-    "usedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "CouponUsage_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -109,19 +96,12 @@ CREATE TABLE "public"."Review" (
     "id" TEXT NOT NULL,
     "courseId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "score" INTEGER NOT NULL,
-    "comment" TEXT,
+    "ratings" INTEGER NOT NULL,
+    "comment" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "isDeleted" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Review_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "public"."_CouponCourses" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL,
-
-    CONSTRAINT "_CouponCourses_AB_pkey" PRIMARY KEY ("A","B")
 );
 
 -- CreateIndex
@@ -132,12 +112,6 @@ CREATE UNIQUE INDEX "Category_name_key" ON "public"."Category"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Payment_transactionId_key" ON "public"."Payment"("transactionId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Coupon_code_key" ON "public"."Coupon"("code");
-
--- CreateIndex
-CREATE INDEX "_CouponCourses_B_index" ON "public"."_CouponCourses"("B");
 
 -- AddForeignKey
 ALTER TABLE "public"."Course" ADD CONSTRAINT "Course_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -161,19 +135,7 @@ ALTER TABLE "public"."Payment" ADD CONSTRAINT "Payment_userId_fkey" FOREIGN KEY 
 ALTER TABLE "public"."Payment" ADD CONSTRAINT "Payment_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "public"."Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."CouponUsage" ADD CONSTRAINT "CouponUsage_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."CouponUsage" ADD CONSTRAINT "CouponUsage_couponId_fkey" FOREIGN KEY ("couponId") REFERENCES "public"."Coupon"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "public"."Review" ADD CONSTRAINT "Review_courseId_fkey" FOREIGN KEY ("courseId") REFERENCES "public"."Course"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Review" ADD CONSTRAINT "Review_userId_fkey" FOREIGN KEY ("userId") REFERENCES "public"."User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."_CouponCourses" ADD CONSTRAINT "_CouponCourses_A_fkey" FOREIGN KEY ("A") REFERENCES "public"."Coupon"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."_CouponCourses" ADD CONSTRAINT "_CouponCourses_B_fkey" FOREIGN KEY ("B") REFERENCES "public"."Course"("id") ON DELETE CASCADE ON UPDATE CASCADE;

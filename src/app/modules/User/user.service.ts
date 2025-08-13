@@ -26,7 +26,16 @@ const getMe = async (id: string) => {
     where: { id },
     include: {
       courseEnrollments: {
-        select: { course: true }
+        select: {
+          course: {
+            include: {
+              author: true,
+              category: true,
+              lessons: true,
+              enrollments: true,
+            },
+          }
+        }
       }
     }
   });

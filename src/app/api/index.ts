@@ -9,8 +9,6 @@ import { courseRoutes } from "../modules/Course/course.routes"
 import { lessonRoutes } from "../modules/Lession/lession.route"
 import { categoryRoutes } from "../modules/Category/category.route"
 import { enrollmentRoutes } from "../modules/Enrollment/enrollment.route"
-import { couponRoutes } from "../modules/Coupon/coupon.route"
-import { useCouponRoutes } from "../modules/CouponUsage/couponUsage.route"
 
 const moduleRoutes = [
   {
@@ -26,7 +24,7 @@ const moduleRoutes = [
     route: courseRoutes,
   },
   {
-    path: "/api/lessions",
+    path: "/api/lessons",
     route: lessonRoutes,
   },
   {
@@ -36,14 +34,6 @@ const moduleRoutes = [
   {
     path: "/api/enrollments",
     route: enrollmentRoutes,
-  },
-  {
-    path: "/api/coupons",
-    route: couponRoutes,
-  },
-  {
-    path: "/api/usecoupons",
-    route: useCouponRoutes,
   },
  
 
