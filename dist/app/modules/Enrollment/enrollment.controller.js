@@ -9,10 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.enrollUser = void 0;
+exports.enrollmentController = void 0;
 const enrollment_service_1 = require("./enrollment.service");
 const enrollUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const enrollment = yield (0, enrollment_service_1.createEnrollment)(req.body);
+    const enrollment = yield enrollment_service_1.enrollmetService.createEnrollment(req.body);
     res.status(201).json({ success: true, data: enrollment });
 });
-exports.enrollUser = enrollUser;
+exports.enrollmentController = {
+    enrollUser
+};

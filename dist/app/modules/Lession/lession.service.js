@@ -1,4 +1,5 @@
 "use strict";
+// services/lesson.service.ts
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9,33 +10,80 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteLessonFromDB = exports.getSingleLessonFromDB = exports.getAllLessonsFromDB = exports.createLessonIntoDB = void 0;
+exports.lessonService = void 0;
+const cloudinary_1 = require("../../lib/cloudinary");
 const prisma_1 = require("../../lib/prisma");
+const AppError_1 = require("../../error/AppError");
+/**
+ ========================================================================================
+ * Create a new lesson with rollback for uploaded video if DB fails
+ ========================================================================================
+ */
 const createLessonIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const lesson = yield prisma_1.prisma.lesson.create({ data: payload });
+    let videoPublicId = payload.videoPublicId;
+    try {
+        // Create the lesson record in DB
+        return yield prisma_1.prisma.lesson.create({
+            data: {
+                title: payload.title,
+                duration: payload.duration,
+                courseId: payload.courseId,
+                video: payload.video,
+                videoPublicId,
+            },
+        });
+    }
+    catch (error) {
+        // If DB insert fails, delete uploaded video from Cloudinary
+        if (videoPublicId) {
+            yield cloudinary_1.cloudinary.uploader.destroy(videoPublicId, { resource_type: "video" });
+        }
+        throw error;
+    }
+});
+/**
+ ========================================================================================
+ * Get all lessons with related course info
+ ========================================================================================
+ */
+const getAllLessonsFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
+    return prisma_1.prisma.lesson.findMany({
+        include: { course: true },
+    });
+});
+/**
+ ========================================================================================
+ * Get a single lesson by ID (with related course)
+ ========================================================================================
+ */
+const getSingleLessonFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const lesson = yield prisma_1.prisma.lesson.findUnique({
+        where: { id },
+        include: { course: true },
+    });
+    if (!lesson)
+        throw new AppError_1.AppError(404, "Lesson not found");
     return lesson;
 });
-exports.createLessonIntoDB = createLessonIntoDB;
-const getAllLessonsFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield prisma_1.prisma.lesson.findMany({
-        include: {
-            course: true,
-        },
-    });
-});
-exports.getAllLessonsFromDB = getAllLessonsFromDB;
-const getSingleLessonFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield prisma_1.prisma.lesson.findUnique({
-        where: { id },
-        include: {
-            course: true,
-        },
-    });
-});
-exports.getSingleLessonFromDB = getSingleLessonFromDB;
+/**
+ ========================================================================================
+ * Delete lesson by ID (hard delete)
+ ========================================================================================
+ */
 const deleteLessonFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield prisma_1.prisma.lesson.delete({
+    const lesson = yield prisma_1.prisma.lesson.findUnique({ where: { id } });
+    if (!lesson)
+        throw new AppError_1.AppError(404, "Lesson not found");
+    return prisma_1.prisma.lesson.update({
         where: { id },
+        data: {
+            isDeleted: true
+        }
     });
 });
-exports.deleteLessonFromDB = deleteLessonFromDB;
+exports.lessonService = {
+    createLessonIntoDB,
+    getAllLessonsFromDB,
+    getSingleLessonFromDB,
+    deleteLessonFromDB,
+};

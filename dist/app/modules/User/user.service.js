@@ -11,51 +11,86 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userService = void 0;
 const prisma_1 = require("../../lib/prisma");
-// 2. Get All Users
+// =============================
+// Get all users (excluding password)
+// =============================
 const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield prisma_1.prisma.user.findMany();
-    return user;
+    const users = yield prisma_1.prisma.user.findMany({
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            avatar: true,
+            isAdmin: true,
+            createdAt: true,
+            updatedAt: true,
+        },
+    });
+    return users;
 });
-// 3. Get User By ID
-const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+// =============================
+// Get current user by ID (Get Me)
+// Includes enrolled courses but excludes password
+// =============================
+const getMe = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield prisma_1.prisma.user.findUnique({
         where: { id },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+            courseEnrollments: { select: { courseId: true } },
+        },
     });
     if (!user) {
         throw new Error("User not found");
     }
+    // Exclude courseEnrollments and password
     return user;
 });
-// 4. Update User
+// =============================
+// Update user by ID
+// Returns updated user (excluding password)
+// =============================
 const updateUser = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield prisma_1.prisma.user.findUnique({ where: { id } });
     if (!user) {
         throw new Error("User not found");
     }
-    return yield prisma_1.prisma.user.update({
+    const updatedUser = yield prisma_1.prisma.user.update({
         where: { id },
         data,
         select: {
             id: true,
-            isAdmin: true,
+            name: true,
             email: true,
+            phone: true,
+            avatar: true,
+            isAdmin: true,
+            createdAt: true,
             updatedAt: true,
         },
     });
+    return updatedUser;
 });
-// 5. Delete User
+// =============================
+// Soft delete user by ID
+// Marks user as deleted instead of removing from DB
+// =============================
 const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield prisma_1.prisma.user.findUnique({ where: { id } });
     if (!user) {
         throw new Error("User not found");
     }
-    yield prisma_1.prisma.user.delete({ where: { id } });
+    yield prisma_1.prisma.user.update({ where: { id }, data: { isDeleted: true } });
     return { message: "User deleted successfully" };
 });
-// ✅ Final Export Object
+// ✅ Exported service object
 exports.userService = {
     getAllUsers,
-    getUserById,
     updateUser,
     deleteUser,
+    getMe,
 };

@@ -8,6 +8,7 @@ import { PrismaClientInitializationError, PrismaClientKnownRequestError, PrismaC
 // Global Error Handler Middleware
 // ====================
 const globalErrorHandler: ErrorRequestHandler = (error: Error, req: Request, res: Response, next: NextFunction) => {
+  console.log(error)
   // Default error response values
   let status = 500
   let name = "InternalServerError"

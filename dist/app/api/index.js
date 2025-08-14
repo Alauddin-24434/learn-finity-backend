@@ -8,8 +8,6 @@ const course_routes_1 = require("../modules/Course/course.routes");
 const lession_route_1 = require("../modules/Lession/lession.route");
 const category_route_1 = require("../modules/Category/category.route");
 const enrollment_route_1 = require("../modules/Enrollment/enrollment.route");
-const coupon_route_1 = require("../modules/Coupon/coupon.route");
-const couponUsage_route_1 = require("../modules/CouponUsage/couponUsage.route");
 const moduleRoutes = [
     {
         path: "/api/auth",
@@ -24,7 +22,7 @@ const moduleRoutes = [
         route: course_routes_1.courseRoutes,
     },
     {
-        path: "/api/lessions",
+        path: "/api/lessons",
         route: lession_route_1.lessonRoutes,
     },
     {
@@ -34,14 +32,6 @@ const moduleRoutes = [
     {
         path: "/api/enrollments",
         route: enrollment_route_1.enrollmentRoutes,
-    },
-    {
-        path: "/api/coupons",
-        route: coupon_route_1.couponRoutes,
-    },
-    {
-        path: "/api/usecoupons",
-        route: couponUsage_route_1.useCouponRoutes,
     },
     {
         path: "/api/payments",

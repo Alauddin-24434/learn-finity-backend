@@ -24,12 +24,10 @@ declare global {
 }
 
 export const authenticate = catchAsyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  let token: string | undefined
-  const authHeader = req.headers.authorization
+  
+  const token = req.headers.authorization
 
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    token = authHeader.split(" ")[1]
-  }
+  
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized: Token missing" })

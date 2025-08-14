@@ -14,7 +14,7 @@ const config_1 = require("./app/config");
 const globalErrorHandler_1 = __importDefault(require("./app/middleware/globalErrorHandler"));
 const app = (0, express_1.default)();
 const PORT = config_1.envVariable.PORT || 5000;
-const clientURL = config_1.envVariable.CLIENT_URL || "http://localhost:3000";
+// const clientURL = envVariable.CLIENT_URL || "http://localhost:3000"
 /**
  * ✅ Middleware Setup (Ordered by priority)
  */
@@ -24,7 +24,7 @@ app.use((0, cookie_parser_1.default)());
 app.use((0, helmet_1.default)());
 // 🌍 3️⃣ CORS
 app.use((0, cors_1.default)({
-    origin: [clientURL],
+    origin: ["http://localhost:3000", "https://elearning-platform-phi.vercel.app"],
     credentials: true,
 }));
 // 📋 4️⃣ Morgan - Request logging

@@ -10,9 +10,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createEnrollment = void 0;
+exports.enrollmetService = void 0;
 const prisma_1 = require("../../lib/prisma");
 const createEnrollment = (data) => __awaiter(void 0, void 0, void 0, function* () {
     return prisma_1.prisma.enrollment.create({ data });
 });
-exports.createEnrollment = createEnrollment;
+exports.enrollmetService = {
+    createEnrollment
+};

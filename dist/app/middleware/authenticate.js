@@ -18,11 +18,7 @@ const catchAsyncHandler_1 = require("../utils/catchAsyncHandler");
 const config_1 = require("../config");
 const prisma_1 = require("../lib/prisma");
 exports.authenticate = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    let token;
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-        token = authHeader.split(" ")[1];
-    }
+    const token = req.headers.authorization;
     if (!token) {
         return res.status(401).json({ message: "Unauthorized: Token missing" });
     }

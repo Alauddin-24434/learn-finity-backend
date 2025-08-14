@@ -1,4 +1,5 @@
 "use strict";
+// controllers/lesson.controller.ts
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9,12 +10,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteLesson = exports.getSingleLesson = exports.getAllLessons = exports.createLesson = void 0;
+exports.lessonController = exports.deleteLesson = exports.getSingleLesson = exports.getAllLessons = exports.createLesson = void 0;
 const catchAsyncHandler_1 = require("../../utils/catchAsyncHandler");
 const lession_service_1 = require("./lession.service");
 const sendResponse_1 = require("../../utils/sendResponse");
 exports.createLesson = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const lesson = yield (0, lession_service_1.createLessonIntoDB)(req.body);
+    var _a;
+    // Extract uploaded files
+    const files = req.files;
+    const videoFile = (_a = files === null || files === void 0 ? void 0 : files.video) === null || _a === void 0 ? void 0 : _a[0];
+    // Extract URLs & public IDs from Cloudinary upload
+    const video = videoFile === null || videoFile === void 0 ? void 0 : videoFile.path;
+    const videoPublicId = videoFile === null || videoFile === void 0 ? void 0 : videoFile.filename;
+    const body = Object.assign(Object.assign({}, req.body), { video,
+        videoPublicId });
+    const lesson = yield lession_service_1.lessonService.createLessonIntoDB(body);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: 201,
         success: true,
@@ -22,8 +32,13 @@ exports.createLesson = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => 
         data: lesson,
     });
 }));
+/**
+ ========================================================================================
+ * Get all lessons
+ ========================================================================================
+ */
 exports.getAllLessons = (0, catchAsyncHandler_1.catchAsyncHandler)((_req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const lessons = yield (0, lession_service_1.getAllLessonsFromDB)();
+    const lessons = yield lession_service_1.lessonService.getAllLessonsFromDB();
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: 200,
         success: true,
@@ -31,9 +46,14 @@ exports.getAllLessons = (0, catchAsyncHandler_1.catchAsyncHandler)((_req, res) =
         data: lessons,
     });
 }));
+/**
+ ========================================================================================
+ * Get single lesson by ID
+ ========================================================================================
+ */
 exports.getSingleLesson = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const lesson = yield (0, lession_service_1.getSingleLessonFromDB)(id);
+    const lesson = yield lession_service_1.lessonService.getSingleLessonFromDB(id);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: 200,
         success: true,
@@ -41,9 +61,14 @@ exports.getSingleLesson = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) 
         data: lesson,
     });
 }));
+/**
+ ========================================================================================
+ * Delete lesson by ID
+ ========================================================================================
+ */
 exports.deleteLesson = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield (0, lession_service_1.deleteLessonFromDB)(id);
+    const result = yield lession_service_1.lessonService.deleteLessonFromDB(id);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: 200,
         success: true,
@@ -51,3 +76,9 @@ exports.deleteLesson = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => 
         data: result,
     });
 }));
+exports.lessonController = {
+    createLesson: exports.createLesson,
+    getAllLessons: exports.getAllLessons,
+    getSingleLesson: exports.getSingleLesson,
+    deleteLesson: exports.deleteLesson,
+};

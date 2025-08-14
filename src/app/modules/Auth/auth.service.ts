@@ -59,8 +59,7 @@ const registerUser = async (userData: IRegisterUser) => {
 ============================================================================
 */
 export const loginUser = async (loginData: ILoginUser) => {
-  console.log("Login attempt:", loginData)
-
+ 
   // Step 1: Find user by email & include password for verification
   const user = await prisma.user.findUnique({
     where: { email: loginData.email },

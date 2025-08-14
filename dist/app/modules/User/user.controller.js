@@ -10,52 +10,70 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userController = void 0;
+const user_service_1 = require("./user.service");
+const catchAsyncHandler_1 = require("../../utils/catchAsyncHandler");
 const jwt_1 = require("../../utils/jwt");
 const cookieOptions_1 = require("../../utils/cookieOptions");
-const user_service_1 = require("./user.service");
-const user_schema_1 = require("./user.schema");
-const catchAsyncHandler_1 = require("../../utils/catchAsyncHandler");
-// =============================================================Get all user==============================================
+// =============================
+// Get all users
+// Returns list of users excluding password
+// =============================
 const getAllUsers = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_service_1.userService.getAllUsers();
-    const response = {
+    res.json({
         success: true,
         message: "Users retrieved successfully",
         data: result,
-    };
-    res.json(response);
+    });
 }));
-//==============================================================Get user byID=================================================
-const getUserById = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const user = yield user_service_1.userService.getUserById(id);
-    const response = {
+// =============================
+// Get current logged-in user (Get Me)
+// =============================
+const getMe = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+    const user = yield user_service_1.userService.getMe(id);
+    res.json({
         success: true,
         message: "User retrieved successfully",
         data: user,
-    };
-    res.json(response);
+    });
 }));
-// ============================================================updateUser======================================================
+// =============================
+// Update user by ID
+// Returns updated user and new access token
+// =============================
 const updateUser = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const validatedData = user_schema_1.updateUserSchema.parse(req.body);
+    const validatedData = req.body; // You can use Zod/Validator here
     const user = yield user_service_1.userService.updateUser(id, validatedData);
     const payload = { id: user.id, role: user.isAdmin };
     const accessToken = (0, jwt_1.createAccessToken)(payload);
     const refreshToken = (0, jwt_1.createRefreshToken)(payload);
-    res.cookie("refreshToken", refreshToken, Object.assign(Object.assign({}, cookieOptions_1.cookieOptions), { maxAge: 7 * 24 * 60 * 60 * 1000 }));
-    res.cookie("accessToken", accessToken, Object.assign(Object.assign({}, cookieOptions_1.cookieOptions), { maxAge: 15 * 60 * 1000 }));
-    const response = {
+    // Set cookies for new tokens
+    res.cookie("refreshToken", refreshToken, cookieOptions_1.cookieOptions);
+    res.json({
         success: true,
         message: "User updated successfully",
         data: { user, accessToken },
-    };
-    res.json(response);
+    });
 }));
-// ✅ Final Export Object
+// =============================
+// Soft delete user by ID
+// Marks user as deleted
+// =============================
+const deleteUser = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const user = yield user_service_1.userService.deleteUser(id);
+    res.json({
+        success: true,
+        message: user.message,
+    });
+}));
+// ✅ Exported controller object
 exports.userController = {
     getAllUsers,
-    getUserById,
+    getMe,
     updateUser,
+    deleteUser,
 };

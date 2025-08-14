@@ -1,51 +1,87 @@
-import { cloudinary } from "../../lib/cloudinary"
-import { prisma } from "../../lib/prisma"
+// services/lesson.service.ts
 
-export const createLessonIntoDB = async (payload: {
-  title: string
-  duration: string
-  videoUrl: string
-  publicId: string
-  courseId: string
-}) => {
+
+import { prisma } from "../../lib/prisma";
+import { ILesson } from "./lession.interface";
+import { AppError } from "../../error/AppError";
+import { cloudinary } from "../../lib/cloudinary";
+
+
+/**
+ ========================================================================================
+ * Create a new lesson with rollback for uploaded video if DB fails
+ ========================================================================================
+ */
+const createLessonIntoDB = async (payload: ILesson) => {
+  let videoPublicId = payload.videoPublicId;
+
   try {
-    // Try creating the lesson record in DB
-    const lesson = await prisma.lesson.create({ data: payload })
-    return lesson
-  } catch (error) {
-    console.error("DB create failed, deleting video from Cloudinary...", error)
-
-    try {
-      // Delete video from Cloudinary using publicId
-      await cloudinary.uploader.destroy(payload.publicId, { resource_type: "video" })
-      console.log("Video deleted from Cloudinary due to DB failure.")
-    } catch (deleteError) {
-      console.error("Failed to delete video from Cloudinary:", deleteError)
+    // Create the lesson record in DB
+    return await prisma.lesson.create({
+      data: {
+        title: payload.title,
+        duration: payload.duration,
+        courseId: payload.courseId,
+        video: payload.video,
+        videoPublicId,
+      },
+    });
+  } catch (err) {
+    // Rollback uploaded files if DB save fails
+    if (videoPublicId) {
+      await cloudinary.uploader.destroy(videoPublicId, { resource_type: "video" });
     }
-
-    // Rethrow original error so caller knows DB create failed
-    throw error
+ 
+    throw err;
   }
-}
-export const getAllLessonsFromDB = async () => {
-  return await prisma.lesson.findMany({
-    include: {
-      course: true,
-    },
-  })
-}
+};
 
-export const getSingleLessonFromDB = async (id: string) => {
-  return await prisma.lesson.findUnique({
-    where: { id },
-    include: {
-      course: true,
-    },
-  })
-}
 
-export const deleteLessonFromDB = async (id: string) => {
-  return await prisma.lesson.delete({
+/**
+ ========================================================================================
+ * Get all lessons with related course info
+ ========================================================================================
+ */
+const getAllLessonsFromDB = async () => {
+  return prisma.lesson.findMany({
+    include: { course: true },
+  });
+};
+
+/**
+ ========================================================================================
+ * Get a single lesson by ID (with related course)
+ ========================================================================================
+ */
+const getSingleLessonFromDB = async (id: string) => {
+  const lesson = await prisma.lesson.findUnique({
     where: { id },
-  })
-}
+    include: { course: true },
+  });
+  if (!lesson) throw new AppError(404, "Lesson not found");
+  return lesson;
+};
+
+/**
+ ========================================================================================
+ * Delete lesson by ID (hard delete)
+ ========================================================================================
+ */
+const deleteLessonFromDB = async (id: string) => {
+  const lesson = await prisma.lesson.findUnique({ where: { id } });
+  if (!lesson) throw new AppError(404, "Lesson not found");
+
+  return prisma.lesson.update({
+    where: { id },
+    data: {
+      isDeleted: true
+    }
+  });
+};
+
+export const lessonService = {
+  createLessonIntoDB,
+  getAllLessonsFromDB,
+  getSingleLessonFromDB,
+  deleteLessonFromDB,
+};

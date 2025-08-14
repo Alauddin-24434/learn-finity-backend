@@ -27,29 +27,55 @@ exports.AuthService = exports.loginUser = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const prisma_1 = require("../../lib/prisma");
 const AppError_1 = require("../../error/AppError");
+/*
+==============================================================================
+  Registers a new user with name, email, password, phone, and optional avatar.
+  Returns the created user object without the password.
+==============================================================================
+*/
 const registerUser = (userData) => __awaiter(void 0, void 0, void 0, function* () {
-    // Check if user already exists
+    // Check if user already exists with the same email
     const existingUser = yield prisma_1.prisma.user.findUnique({
         where: { email: userData.email },
     });
     if (existingUser) {
         throw new AppError_1.AppError(400, "User already exists with this email");
     }
-    // Hash password
+    // TODO: Normalize email (lowercase & trim) before saving to avoid duplicates
+    // userData.email = userData.email.trim().toLowerCase();
+    // TODO: Enforce strong password policy before hashing (min length, special char, number, uppercase)
+    // Hash password with bcrypt (12 salt rounds)
     const hashedPassword = yield bcryptjs_1.default.hash(userData.password, 12);
-    // Create user
+    // Create user in the database & select only safe fields (exclude password)
     const user = yield prisma_1.prisma.user.create({
         data: {
             name: userData.name,
             email: userData.email,
             password: hashedPassword,
+            phone: userData.phone,
+            avatar: userData.avatar,
+        },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            avatar: true,
+            isAdmin: true,
+            createdAt: true,
+            updatedAt: true,
         },
     });
     return user;
 });
+/*
+============================================================================
+  Logs in a user using email and password.
+  Returns the user object without the password if authentication succeeds.
+============================================================================
+*/
 const loginUser = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(loginData);
-    // Step 1: Find user by email and include password
+    // Step 1: Find user by email & include password for verification
     const user = yield prisma_1.prisma.user.findUnique({
         where: { email: loginData.email },
         select: {
@@ -57,21 +83,24 @@ const loginUser = (loginData) => __awaiter(void 0, void 0, void 0, function* () 
             name: true,
             email: true,
             isAdmin: true,
-            password: true, // include password for comparison
+            password: true, // Needed for password comparison
         },
     });
-    console.log("user", user);
+    // If user not found, throw error
     if (!user) {
         throw new AppError_1.AppError(400, "Invalid email or password");
     }
-    // Step 2: Compare password
+    // Step 2: Compare provided password with stored hash
     const isPasswordMatched = yield bcryptjs_1.default.compare(loginData.password, user.password);
+    console.log("Password match:", isPasswordMatched);
     if (!isPasswordMatched) {
         throw new AppError_1.AppError(400, "Invalid email or password");
     }
-    console.log("pass", isPasswordMatched);
-    // Step 3: Remove password before returning user
-    const { password } = user, userWithoutPassword = __rest(user, ["password"]);
+    // Step 3: Remove password before returning
+    const { password } = user, userWithoutPassword = __rest(user
+    // TODO: Implement login attempt limit / rate-limiting to prevent brute force attacks
+    , ["password"]);
+    // TODO: Implement login attempt limit / rate-limiting to prevent brute force attacks
     return userWithoutPassword;
 });
 exports.loginUser = loginUser;

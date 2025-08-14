@@ -2,7 +2,7 @@ import { Router } from "express"
 import { AuthController } from "./auth.controller"
 import { validateRequest } from "../../middleware/validateRequest"
 import { loginValidationSchema, registerValidationSchema } from "./auth.validation"
-import { uploadImage } from "../../lib/cloudinary"
+import { upload } from "../../lib/cloudinary"
 
 const router = Router()
 
@@ -15,7 +15,7 @@ const router = Router()
 */
 router.post(
   "/signup",
-  uploadImage.single("avatar"),                // Handle avatar image upload to Cloudinary
+  upload.single("avatar"),                // Handle avatar image upload to Cloudinary
   validateRequest(registerValidationSchema),   // Validate request body with schema
   AuthController.register                      // Controller logic for registration
 )

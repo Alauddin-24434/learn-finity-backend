@@ -1,102 +1,99 @@
+import { prisma } from "../../lib/prisma"
 
-
-
-
-import { prisma } from "../../lib/prisma";
-
-
-
-
-
-
-// 2. Get All Users
+// =============================
+// Get all users (excluding password)
+// =============================
 const getAllUsers = async () => {
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      avatar: true,
+      isAdmin: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  })
 
-  const user = await prisma.user.findMany();
+  return users
+}
 
-  return user;
-
-
-};
-
-
-// 3. Get User By ID
+// =============================
+// Get current user by ID (Get Me)
+// Includes enrolled courses but excludes password
+// =============================
 const getMe = async (id: string) => {
-  const user = await prisma.user.findUnique({
-    where: { id },
-    include: {
-      courseEnrollments: {
-        select: {
-          course: {
-            include: {
-              author: true,
-              category: true,
-              lessons: true,
-              enrollments: true,
-            },
-          }
-        }
-      }
-    }
-  });
+ const user = await prisma.user.findUnique({
+  where: { id },
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    avatar:true,
+    courseEnrollments: { select: { courseId: true } }, 
+  },
+})
+
 
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("User not found")
   }
 
-  // শুধু course অ্যারে বানানো
-  const courses = user.courseEnrollments.map(e => e.course);
 
-  // courseEnrollments ও password বাদ দিয়ে নতুন অবজেক্ট রিটার্ন
-  const { courseEnrollments, password, ...rest } = user;
+  // Exclude courseEnrollments and password
+  
+  return user;
+}
 
-  return {
-    ...rest,
-    courses
-  };
-};
-
-
-
-// 4. Update User
+// =============================
+// Update user by ID
+// Returns updated user (excluding password)
+// =============================
 const updateUser = async (id: string, data: any) => {
-  const user = await prisma.user.findUnique({ where: { id } });
+  const user = await prisma.user.findUnique({ where: { id } })
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("User not found")
   }
 
-  return await prisma.user.update({
+  const updatedUser = await prisma.user.update({
     where: { id },
     data,
     select: {
       id: true,
-      isAdmin: true,
+      name: true,
       email: true,
-
+      phone: true,
+      avatar: true,
+      isAdmin: true,
+      createdAt: true,
       updatedAt: true,
     },
-  });
-};
+  })
 
-// 5. Delete User
+  return updatedUser
+}
+
+// =============================
+// Soft delete user by ID
+// Marks user as deleted instead of removing from DB
+// =============================
 const deleteUser = async (id: string) => {
-  const user = await prisma.user.findUnique({ where: { id } });
+  const user = await prisma.user.findUnique({ where: { id } })
   if (!user) {
-    throw new Error("User not found");
+    throw new Error("User not found")
   }
 
-  await prisma.user.delete({ where: { id } });
-  return { message: "User deleted successfully" };
-};
+  await prisma.user.update({ where: { id }, data: { isDeleted: true } })
 
+  return { message: "User deleted successfully" }
+}
 
-
-// ✅ Final Export Object
+// ✅ Exported service object
 export const userService = {
-
   getAllUsers,
   updateUser,
   deleteUser,
-  getMe
-
-};
+  getMe,
+}

@@ -8,6 +8,7 @@ const library_1 = require("../../../generated/prisma/runtime/library");
 // ====================
 const globalErrorHandler = (error, req, res, next) => {
     var _a, _b;
+    console.log(error);
     // Default error response values
     let status = 500;
     let name = "InternalServerError";
