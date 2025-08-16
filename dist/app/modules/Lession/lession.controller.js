@@ -10,10 +10,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.lessonController = exports.deleteLesson = exports.getSingleLesson = exports.getAllLessons = exports.createLesson = void 0;
+exports.lessonController = exports.lessonProgressController = exports.updateLessonProgress = exports.deleteLesson = exports.getLessonByCourseId = exports.getAllLessons = exports.createLesson = void 0;
 const catchAsyncHandler_1 = require("../../utils/catchAsyncHandler");
 const lession_service_1 = require("./lession.service");
 const sendResponse_1 = require("../../utils/sendResponse");
+const AppError_1 = require("../../error/AppError");
 exports.createLesson = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     // Extract uploaded files
@@ -51,14 +52,19 @@ exports.getAllLessons = (0, catchAsyncHandler_1.catchAsyncHandler)((_req, res) =
  * Get single lesson by ID
  ========================================================================================
  */
-exports.getSingleLesson = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const lesson = yield lession_service_1.lessonService.getSingleLessonFromDB(id);
+// controller
+exports.getLessonByCourseId = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const { id: courseId } = req.params;
+    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+    if (!userId)
+        throw new AppError_1.AppError(401, "Unauthorized");
+    const lessons = yield lession_service_1.lessonService.getLessonFromDByCourseId(courseId, userId);
     (0, sendResponse_1.sendResponse)(res, {
         statusCode: 200,
         success: true,
         message: "Lesson retrieved successfully",
-        data: lesson,
+        data: lessons,
     });
 }));
 /**
@@ -76,9 +82,32 @@ exports.deleteLesson = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => 
         data: result,
     });
 }));
+/**
+ ========================================================================================
+ * Update lesson progress for a user
+ ========================================================================================
+ */
+exports.updateLessonProgress = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+    if (!userId)
+        throw new AppError_1.AppError(401, "Unauthorized");
+    const { lessonId, courseId } = req.body;
+    const progress = yield lession_service_1.lessonService.lessonProgressUpdate(userId, lessonId, courseId);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: 200,
+        success: true,
+        message: "Lesson progress updated successfully",
+        data: progress,
+    });
+}));
+exports.lessonProgressController = {
+    updateLessonProgress: exports.updateLessonProgress,
+};
 exports.lessonController = {
     createLesson: exports.createLesson,
     getAllLessons: exports.getAllLessons,
-    getSingleLesson: exports.getSingleLesson,
+    getLessonByCourseId: exports.getLessonByCourseId,
     deleteLesson: exports.deleteLesson,
+    updateLessonProgress: exports.updateLessonProgress
 };

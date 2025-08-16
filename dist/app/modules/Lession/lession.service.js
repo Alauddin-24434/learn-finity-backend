@@ -9,11 +9,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.lessonService = void 0;
-const cloudinary_1 = require("../../lib/cloudinary");
 const prisma_1 = require("../../lib/prisma");
 const AppError_1 = require("../../error/AppError");
+const cloudinary_1 = require("../../lib/cloudinary");
 /**
  ========================================================================================
  * Create a new lesson with rollback for uploaded video if DB fails
@@ -33,12 +44,12 @@ const createLessonIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functi
             },
         });
     }
-    catch (error) {
-        // If DB insert fails, delete uploaded video from Cloudinary
+    catch (err) {
+        // Rollback uploaded files if DB save fails
         if (videoPublicId) {
             yield cloudinary_1.cloudinary.uploader.destroy(videoPublicId, { resource_type: "video" });
         }
-        throw error;
+        throw err;
     }
 });
 /**
@@ -56,14 +67,29 @@ const getAllLessonsFromDB = () => __awaiter(void 0, void 0, void 0, function* ()
  * Get a single lesson by ID (with related course)
  ========================================================================================
  */
-const getSingleLessonFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const lesson = yield prisma_1.prisma.lesson.findUnique({
-        where: { id },
-        include: { course: true },
+const getLessonFromDByCourseId = (courseId, userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const lessons = yield prisma_1.prisma.lesson.findMany({
+        where: { courseId },
+        include: {
+            lessonProgress: {
+                where: { userId },
+                select: { completed: true },
+            },
+            course: {
+                select: { thumbnail: true },
+            },
+        },
+        orderBy: { createdAt: "asc" },
     });
-    if (!lesson)
-        throw new AppError_1.AppError(404, "Lesson not found");
-    return lesson;
+    if (lessons.length === 0) {
+        throw new AppError_1.AppError(404, "Lessons not found");
+    }
+    // lessonProgress exclude করে শুধু isProgressCompleted রাখব
+    return lessons.map((lesson) => {
+        var _a;
+        const { lessonProgress } = lesson, rest = __rest(lesson, ["lessonProgress"]); // lessonProgress remove
+        return Object.assign(Object.assign({}, rest), { isProgressCompleted: ((_a = lessonProgress === null || lessonProgress === void 0 ? void 0 : lessonProgress[0]) === null || _a === void 0 ? void 0 : _a.completed) || false });
+    });
 });
 /**
  ========================================================================================
@@ -77,13 +103,31 @@ const deleteLessonFromDB = (id) => __awaiter(void 0, void 0, void 0, function* (
     return prisma_1.prisma.lesson.update({
         where: { id },
         data: {
-            isDeleted: true
+            isDeleted: true,
         }
     });
+});
+const lessonProgressUpdate = (userId, lessonId, courseId) => __awaiter(void 0, void 0, void 0, function* () {
+    const progress = yield prisma_1.prisma.lessonProgress.upsert({
+        where: {
+            userId_lessonId: { userId, lessonId }
+        },
+        update: {
+            completed: true,
+        },
+        create: {
+            userId,
+            lessonId,
+            courseId,
+            completed: true,
+        }
+    });
+    return progress;
 });
 exports.lessonService = {
     createLessonIntoDB,
     getAllLessonsFromDB,
-    getSingleLessonFromDB,
+    getLessonFromDByCourseId,
     deleteLessonFromDB,
+    lessonProgressUpdate
 };

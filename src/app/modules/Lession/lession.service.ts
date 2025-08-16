@@ -31,7 +31,7 @@ const createLessonIntoDB = async (payload: ILesson) => {
     if (videoPublicId) {
       await cloudinary.uploader.destroy(videoPublicId, { resource_type: "video" });
     }
- 
+
     throw err;
   }
 };
@@ -53,14 +53,36 @@ const getAllLessonsFromDB = async () => {
  * Get a single lesson by ID (with related course)
  ========================================================================================
  */
-const getSingleLessonFromDB = async (id: string) => {
-  const lesson = await prisma.lesson.findUnique({
-    where: { id },
-    include: { course: true },
+
+ const getLessonFromDByCourseId =async (courseId: string, userId: string) => {
+  const lessons = await prisma.lesson.findMany({
+    where: { courseId },
+    include: {
+      lessonProgress: {
+        where: { userId },
+        select: { completed: true },
+      },
+      course: {
+        select: { thumbnail: true },
+      },
+    },
+    orderBy: { createdAt: "asc" },
   });
-  if (!lesson) throw new AppError(404, "Lesson not found");
-  return lesson;
+
+  if (lessons.length === 0) {
+    throw new AppError(404, "Lessons not found");
+  }
+
+  // lessonProgress exclude করে শুধু isProgressCompleted রাখব
+  return lessons.map((lesson) => {
+    const { lessonProgress, ...rest } = lesson; // lessonProgress remove
+    return {
+      ...rest,
+      isProgressCompleted: lessonProgress?.[0]?.completed || false,
+    };
+  });
 };
+
 
 /**
  ========================================================================================
@@ -74,14 +96,48 @@ const deleteLessonFromDB = async (id: string) => {
   return prisma.lesson.update({
     where: { id },
     data: {
-      isDeleted: true
+      isDeleted: true,
+
     }
   });
 };
 
+
+
+
+const lessonProgressUpdate = async (
+  userId: string,
+  lessonId: string,
+  courseId: string
+) => {
+
+  const progress = await prisma.lessonProgress.upsert({
+    where: {
+      userId_lessonId: { userId, lessonId }
+    },
+    update: {
+      completed: true,
+
+    },
+    create: {
+      userId,
+      lessonId,
+      courseId,
+      completed: true,
+
+    }
+  })
+
+  return progress
+
+}
+
+
+
 export const lessonService = {
   createLessonIntoDB,
   getAllLessonsFromDB,
-  getSingleLessonFromDB,
+  getLessonFromDByCourseId,
   deleteLessonFromDB,
+  lessonProgressUpdate
 };

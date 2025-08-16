@@ -26,10 +26,9 @@ export const createCourseZodSchema = z.object({
       .nullable(),
 
     price: z
-      .number("Price is required")
-      .min(0, "Price can't be negative"),
-
-    isFree: z.boolean().default(false),
+      .string("Price is required"),
+  
+    isFree: z.string("Is free is required"),
 
     authorId: z
       .string("Author ID is required")
