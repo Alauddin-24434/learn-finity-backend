@@ -9,6 +9,7 @@ import { courseRoutes } from "../modules/Course/course.routes"
 import { lessonRoutes } from "../modules/Lession/lession.route"
 import { categoryRoutes } from "../modules/Category/category.route"
 import { enrollmentRoutes } from "../modules/Enrollment/enrollment.route"
+import { dashboardRoute } from "../modules/Dashboard/overview.route"
 
 const moduleRoutes = [
   {
@@ -40,6 +41,10 @@ const moduleRoutes = [
   {
     path: "/api/payments",
     route: paymentRoutes,
+  },
+  {
+    path: "/api/overviews",
+    route: dashboardRoute,
   },
 
 
