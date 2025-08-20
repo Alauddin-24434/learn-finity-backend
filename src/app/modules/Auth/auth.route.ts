@@ -6,13 +6,8 @@ import { upload } from "../../lib/cloudinary"
 
 const router = Router()
 
-/*
-=============================================================================================
-  POST /api/auth/signup
-  Registers a new user with optional avatar upload.
-  Public access.
-==============================================================================================
-*/
+
+//=============POST /api/auth/signup==========================================
 router.post(
   "/signup",
   upload.single("avatar"),                // Handle avatar image upload to Cloudinary

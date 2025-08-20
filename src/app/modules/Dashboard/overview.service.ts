@@ -65,60 +65,104 @@ export const getAdminDashboardOverview = async () => {
 // User Dashboard Analytics
 // ------------------
 export const getUserDashboardOverview = async (userId: string) => {
-  // Enrolled Courses
+  // --------- STUDENT DATA ----------
   const enrolledCourses = await prisma.enrollment.findMany({
     where: { userId, isDeleted: false },
     include: { course: true },
   });
 
-  // Lesson Progress
   const lessonProgress = await prisma.lessonProgress.findMany({
     where: { userId, completed: true },
     include: { lesson: true },
   });
 
-  // Payments
-  const payments = await prisma.payment.findMany({
+  const studentPayments = await prisma.payment.findMany({
     where: { userId, isDeleted: false, status: "PAID" },
   });
 
-  // Lesson Completion per Course
-  const progressPerCourse: { courseId: string; title: string; completedLessons: number; totalLessons: number }[] = [];
-  for (let enrollment of enrolledCourses) {
-    const totalLessons = await prisma.lesson.count({ where: { courseId: enrollment.courseId, isDeleted: false } });
-    const completedLessons = lessonProgress.filter((lp) => lp.courseId === enrollment.courseId).length;
+  // Progress per enrolled course
+  const progressPerCourse = await Promise.all(
+    enrolledCourses.map(async (enroll) => {
+      const totalLessons = await prisma.lesson.count({
+        where: { courseId: enroll.courseId, isDeleted: false },
+      });
+      const completedLessons = lessonProgress.filter(
+        (lp) => lp.courseId === enroll.courseId
+      ).length;
 
-    progressPerCourse.push({
-      courseId: enrollment.courseId,
-      title: enrollment.course.title,
-      completedLessons,
-      totalLessons,
-    });
-  }
+      return {
+        courseId: enroll.courseId,
+        title: enroll.course.title,
+        completedLessons,
+        totalLessons,
+      };
+    })
+  );
 
-  // Monthly Progress (Lessons completed per month, last 6 months)
+  // --------- CREATOR DATA ----------
+  const createdCourses = await prisma.course.findMany({
+    where: { authorId: userId, isDeleted: false },
+    include: { enrollments: true, payments: true },
+  });
+
+  const enrollmentsPerCourse = createdCourses.map((course) => ({
+    courseId: course.id,
+    title: course.title,
+    enrollments: course.enrollments.length,
+    revenue: course.payments
+      .filter((p) => p.status === "PAID")
+      .reduce((acc, p) => acc + p.amount, 0),
+  }));
+
+  const totalRevenue = enrollmentsPerCourse.reduce(
+    (acc, c) => acc + c.revenue,
+    0
+  );
+
+  // Weekly / Monthly / Yearly Revenue
   const today = new Date();
-  const monthlyProgress: { month: string; completedLessons: number }[] = [];
-  for (let i = 5; i >= 0; i--) {
-    const start = startOfMonth(subMonths(today, i));
-    const end = endOfMonth(subMonths(today, i));
+  const weeklyRevenue = createdCourses.reduce((acc, course) => {
+    const weeklyPayments = course.payments.filter(
+      (p) =>
+        p.status === "PAID" &&
+        new Date(p.paidAt) >= new Date(today.setDate(today.getDate() - 7))
+    );
+    return acc + weeklyPayments.reduce((sum, p) => sum + p.amount, 0);
+  }, 0);
 
-    const completed = await prisma.lessonProgress.count({
-      where: { userId, completed: true },
-    });
+  const monthlyRevenue = createdCourses.reduce((acc, course) => {
+    const monthlyPayments = course.payments.filter(
+      (p) =>
+        p.status === "PAID" &&
+        new Date(p.paidAt).getMonth() === today.getMonth() &&
+        new Date(p.paidAt).getFullYear() === today.getFullYear()
+    );
+    return acc + monthlyPayments.reduce((sum, p) => sum + p.amount, 0);
+  }, 0);
 
-    monthlyProgress.push({
-      month: start.toLocaleString("default", { month: "short", year: "numeric" }),
-      completedLessons: completed,
-    });
-  }
+  const yearlyRevenue = createdCourses.reduce((acc, course) => {
+    const yearlyPayments = course.payments.filter(
+      (p) =>
+        p.status === "PAID" &&
+        new Date(p.paidAt).getFullYear() === today.getFullYear()
+    );
+    return acc + yearlyPayments.reduce((sum, p) => sum + p.amount, 0);
+  }, 0);
 
   return {
+    // STUDENT INFO
     enrolledCoursesCount: enrolledCourses.length,
     completedLessonsCount: lessonProgress.length,
-    totalPayments: payments.length,
-    totalSpent: payments.reduce((acc, curr) => acc + curr.amount, 0),
+    paymentsMade: studentPayments.length,
+    totalSpent: studentPayments.reduce((acc, p) => acc + p.amount, 0),
     progressPerCourse,
-    monthlyProgress,
+
+    // CREATOR INFO
+    createdCoursesCount: createdCourses.length,
+    enrollmentsPerCourse,
+    totalRevenue,
+    weeklyRevenue,
+    monthlyRevenue,
+    yearlyRevenue,
   };
 };
