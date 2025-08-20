@@ -9,7 +9,7 @@ const initiatePaymentInDb = async (paymentData: IPaymentInput) => {
   const { amount, userId, transactionId, provider, courseId, currency, phone } = paymentData;
 
   try {
-    // প্রথমে ডাটাবেসে পেমেন্ট রেকর্ড তৈরি
+  
     const user = await prisma.user.findFirst({ where: { id: userId } });
     if (!user) throw new AppError(404, "User not found");
 
@@ -26,7 +26,7 @@ const initiatePaymentInDb = async (paymentData: IPaymentInput) => {
       },
     });
 
-    // তারপর পেমেন্ট ইনিশিয়েট করুন (ট্রানজেকশনের বাইরে)
+  
     const paymentInitiateResult = await initiatePayment({
       name: user.name,
       email: user.email,
@@ -36,7 +36,7 @@ const initiatePaymentInDb = async (paymentData: IPaymentInput) => {
       currency,
     });
 
-    // console.log("paymentInitiateResult",paymentInitiateResult)
+  
 
     return paymentInitiateResult;
   } catch (error) {

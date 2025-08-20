@@ -155,8 +155,7 @@ export const getUserDashboardOverview = async (userId: string) => {
     completedLessonsCount: lessonProgress.length,
     paymentsMade: studentPayments.length,
     totalSpent: studentPayments.reduce((acc, p) => acc + p.amount, 0),
-    progressPerCourse,
-
+    
     // CREATOR INFO
     createdCoursesCount: createdCourses.length,
     enrollmentsPerCourse,

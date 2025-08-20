@@ -7,13 +7,7 @@ const validateRequest_1 = require("../../middleware/validateRequest");
 const auth_validation_1 = require("./auth.validation");
 const cloudinary_1 = require("../../lib/cloudinary");
 const router = (0, express_1.Router)();
-/*
-=============================================================================================
-  POST /api/auth/signup
-  Registers a new user with optional avatar upload.
-  Public access.
-==============================================================================================
-*/
+//=============POST /api/auth/signup==========================================
 router.post("/signup", cloudinary_1.upload.single("avatar"), // Handle avatar image upload to Cloudinary
 (0, validateRequest_1.validateRequest)(auth_validation_1.registerValidationSchema), // Validate request body with schema
 auth_controller_1.AuthController.register // Controller logic for registration

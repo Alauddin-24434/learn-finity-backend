@@ -9,6 +9,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.courseService = void 0;
 const AppError_1 = require("../../error/AppError");
@@ -75,12 +86,14 @@ const getCourseById = (id) => __awaiter(void 0, void 0, void 0, function* () {
             author: true,
             category: true,
             lessons: true,
-            enrollments: true,
+            enrollments: true, // we only need the counts
         },
     });
     if (!course)
         throw new AppError_1.AppError(404, "Course not found");
-    return course;
+    // Destructure lessons and enrollments, keep the rest
+    const { lessons, enrollments } = course, rest = __rest(course, ["lessons", "enrollments"]);
+    return Object.assign(Object.assign({}, rest), { lessonsCount: lessons.length, enrollmentsCount: enrollments.length });
 });
 /**
  ==================================================================================================
@@ -131,8 +144,13 @@ const getAllCourses = (query) => __awaiter(void 0, void 0, void 0, function* () 
         skip,
         take: limitNumber,
     });
+    // Transform to only include counts for lessons & enrollments
+    const coursesWithCounts = courses.map((_a) => {
+        var { lessons, enrollments } = _a, rest = __rest(_a, ["lessons", "enrollments"]);
+        return (Object.assign(Object.assign({}, rest), { lessonsCount: lessons.length, enrollmentsCount: enrollments.length }));
+    });
     return {
-        courses,
+        courses: coursesWithCounts,
         totalPages: Math.ceil(totalCourses / limitNumber),
         currentPage: pageNumber,
         totalCourses,

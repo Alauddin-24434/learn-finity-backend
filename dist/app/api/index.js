@@ -8,6 +8,7 @@ const course_routes_1 = require("../modules/Course/course.routes");
 const lession_route_1 = require("../modules/Lession/lession.route");
 const category_route_1 = require("../modules/Category/category.route");
 const enrollment_route_1 = require("../modules/Enrollment/enrollment.route");
+const overview_route_1 = require("../modules/Dashboard/overview.route");
 const moduleRoutes = [
     {
         path: "/api/auth",
@@ -36,6 +37,10 @@ const moduleRoutes = [
     {
         path: "/api/payments",
         route: payment_route_1.paymentRoutes,
+    },
+    {
+        path: "/api/overviews",
+        route: overview_route_1.dashboardRoute,
     },
 ];
 const initialRoute = (app) => {

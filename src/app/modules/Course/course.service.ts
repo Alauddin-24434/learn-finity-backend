@@ -68,12 +68,22 @@ const getCourseById = async (id: string) => {
       author: true,
       category: true,
       lessons: true,
-      enrollments: true,
+      enrollments: true, // we only need the counts
     },
   });
+
   if (!course) throw new AppError(404, "Course not found");
-  return course;
+
+  // Destructure lessons and enrollments, keep the rest
+  const { lessons, enrollments, ...rest } = course;
+
+  return {
+    ...rest,
+    lessonsCount: lessons.length,
+    enrollmentsCount: enrollments.length,
+  };
 };
+
 
 /**
  ==================================================================================================
@@ -130,13 +140,21 @@ const getAllCourses = async (query: any) => {
     take: limitNumber,
   });
 
+  // Transform to only include counts for lessons & enrollments
+  const coursesWithCounts = courses.map(({ lessons, enrollments, ...rest }) => ({
+    ...rest,
+    lessonsCount: lessons.length,
+    enrollmentsCount: enrollments.length,
+  }));
+
   return {
-    courses,
+    courses: coursesWithCounts,
     totalPages: Math.ceil(totalCourses / limitNumber),
     currentPage: pageNumber,
     totalCourses,
   };
 };
+
 
 /**
  =============================================================================================================

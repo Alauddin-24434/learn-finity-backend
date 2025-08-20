@@ -18,7 +18,6 @@ const verifyPayment_1 = require("../../paymentIntegration/verifyPayment");
 const initiatePaymentInDb = (paymentData) => __awaiter(void 0, void 0, void 0, function* () {
     const { amount, userId, transactionId, provider, courseId, currency, phone } = paymentData;
     try {
-        // প্রথমে ডাটাবেসে পেমেন্ট রেকর্ড তৈরি
         const user = yield prisma_1.prisma.user.findFirst({ where: { id: userId } });
         if (!user)
             throw new AppError_1.AppError(404, "User not found");
@@ -34,7 +33,6 @@ const initiatePaymentInDb = (paymentData) => __awaiter(void 0, void 0, void 0, f
                 phone,
             },
         });
-        // তারপর পেমেন্ট ইনিশিয়েট করুন (ট্রানজেকশনের বাইরে)
         const paymentInitiateResult = yield (0, initiate_payment_1.initiatePayment)({
             name: user.name,
             email: user.email,
@@ -43,7 +41,6 @@ const initiatePaymentInDb = (paymentData) => __awaiter(void 0, void 0, void 0, f
             transactionId,
             currency,
         });
-        // console.log("paymentInitiateResult",paymentInitiateResult)
         return paymentInitiateResult;
     }
     catch (error) {
