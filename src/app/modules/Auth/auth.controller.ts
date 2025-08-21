@@ -5,6 +5,7 @@ import { cookieOptions } from "../../utils/cookieOptions"
 import { createAccessToken, createRefreshToken, verifyRefreshToken } from "../../utils/jwt"
 import { sendResponse } from "../../utils/sendResponse"
 import { prisma } from "../../lib/prisma"
+import { AppError } from "../../error/AppError"
 
 /*
 ===================================================================================
@@ -89,25 +90,23 @@ const logout = catchAsyncHandler(async (req: Request, res: Response) => {
 ======================================================================================
 */
 const refreshAccessToken = catchAsyncHandler(async (req: Request, res: Response) => {
-  const refreshTokenRaw = req.cookies?.refreshToken || (req.headers["x-refresh-token"] as string)
-
-  if (!refreshTokenRaw) {
-    return res.status(401).json({ success: false, message: "Refresh token missing" })
+  const refreshToken = req.cookies?.refreshToken || req.headers["x-refresh-token"];
+  if (!refreshToken) {
+    throw new AppError(401, "Refresh token missing",);
   }
 
-  let decoded
-  try {
-    decoded = verifyRefreshToken(refreshTokenRaw)
-  } catch (err) {
-    return res.status(403).json({ success: false, message: "Invalid or expired refresh token" })
-  }
 
+  const decoded = verifyRefreshToken(refreshToken)
+
+  if (!decoded) {
+    throw new AppError(403, "Invalid or expired refresh token")
+  }
   const user = await prisma.user.findUnique({
     where: { id: decoded.id },
   })
 
   if (!user) {
-    return res.status(404).json({ success: false, message: "User not found" })
+   throw new AppError(403,"User not found" )
   }
 
   const payload = { id: user.id, isAdmin: user.isAdmin }

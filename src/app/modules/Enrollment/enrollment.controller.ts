@@ -1,13 +1,22 @@
 // controllers/enrollment.controller.ts
 import { Request, Response } from "express";
-import { enrollmetService } from "./enrollment.service";
+import { enrollmentService } from "./enrollment.service";
+import { catchAsyncHandler } from "../../utils/catchAsyncHandler";
 
- const enrollUser = async (req: Request, res: Response) => {
-  const enrollment = await enrollmetService.createEnrollment(req.body);
+// Enroll a user in a course
+const enrollUser = catchAsyncHandler(async (req: Request, res: Response) => {
+  const enrollment = await enrollmentService.createEnrollment(req.body);
   res.status(201).json({ success: true, data: enrollment });
-};
-
-
-export const enrollmentController={
-  enrollUser
 }
+)
+// Get all enrollments of a user by userId
+const getEnrollmentsByUserId = catchAsyncHandler(async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  const enrollments = await enrollmentService.getEnrollmentsByUserId(userId);
+  res.status(200).json({ success: true, data: enrollments });
+} )
+
+export const enrollmentController = {
+  enrollUser,
+  getEnrollmentsByUserId,
+};

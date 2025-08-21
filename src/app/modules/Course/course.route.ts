@@ -94,6 +94,30 @@ router.patch("/:id", authenticate, courseController.updateCourseById);
 
 /**
  * @swagger
+ * /api/courses/author/{authorId}:
+ *   get:
+ *     summary: Get courses by author ID
+ *     tags: [Courses]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: authorId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the author
+ *     responses:
+ *       200:
+ *         description: List of courses by author
+ */
+router.get("/author/:authorId", authenticate, courseController.getCoursesByAuthor);
+
+
+
+
+/**
+ * @swagger
  * /api/courses/{id}/delete:
  *   patch:
  *     summary: Soft delete a course by ID

@@ -20,7 +20,7 @@ const createCourse = async (data: ICourse) => {
   let thumbnailPublicId = data.thumbnailPublicId;
   let overviewVideoPublicId = data.overviewVideoPublicId;
 
-  try {
+  
     return await prisma.course.create({
       data: {
         title: data.title,
@@ -38,15 +38,7 @@ const createCourse = async (data: ICourse) => {
         overviews: data.overviews,
       },
     });
-  } catch (err) {
-    if (thumbnailPublicId) {
-      await cloudinary.uploader.destroy(thumbnailPublicId, { resource_type: "image" });
-    }
-    if (overviewVideoPublicId) {
-      await cloudinary.uploader.destroy(overviewVideoPublicId, { resource_type: "video" });
-    }
-    throw err;
-  }
+
 };
 
 /**
@@ -121,6 +113,21 @@ const getAllCourses = async (query: any) => {
   };
 };
 
+ const getCoursesByAuthor=async (authorId: string) => {
+    const courses = await prisma.course.findMany({
+      where: { authorId },
+      include: {
+        author: true,
+        category: true,
+        lessons: true,
+      },
+    });
+
+    return courses;
+  }
+
+
+
 /**
  * Update course by ID
  */
@@ -155,4 +162,5 @@ export const courseService = {
   updateCourseById,
   softDeleteCourseById,
   restoreCourseById,
+  getCoursesByAuthor
 };

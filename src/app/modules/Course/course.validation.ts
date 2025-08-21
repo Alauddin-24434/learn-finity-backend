@@ -20,9 +20,7 @@ export const createCourseZodSchema = z.object({
   
 
     overviewVideo: z
-      .string()
-      .url("Invalid video URL")
-      .optional()
+      .string().optional()
       .nullable(),
 
     price: z

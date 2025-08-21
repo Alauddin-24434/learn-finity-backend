@@ -72,7 +72,7 @@ router.post(
 
 /**
  * @swagger
- * /api/auth/refreshToken:
+ * /api/auth/refresh-token:
  *   get:
  *     summary: Refresh access token using refresh token
  *     tags: [Auth]
@@ -83,7 +83,7 @@ router.post(
  *         description: Invalid or expired refresh token
  */
 router.get(
-  "/refreshToken",
+  "/refresh-token",
   AuthController.refreshAccessToken
 )
 

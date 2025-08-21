@@ -28,21 +28,6 @@ const router = Router();
  */
 router.get("/", authenticate, authorize("admin"), userController.getAllUsers);
 
-/**
- * @swagger
- * /api/users/me:
- *   get:
- *     summary: Get current logged-in user
- *     tags: [Users]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Current user data
- *       401:
- *         description: Unauthorized
- */
-router.get("/me", authenticate, userController.getMe);
 
 /**
  * @swagger

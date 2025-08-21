@@ -18,19 +18,7 @@ const getAllUsers = catchAsyncHandler(async (req: Request, res: Response) => {
   })
 })
 
-// =============================
-// Get current logged-in user (Get Me)
-// =============================
-const getMe = catchAsyncHandler(async (req: Request, res: Response) => {
-  const id = req.user?.id
-  const user = await userService.getMe(id as string)
 
-  res.json({
-    success: true,
-    message: "User retrieved successfully",
-    data: user,
-  })
-})
 
 // =============================
 // Update user by ID
@@ -72,7 +60,7 @@ const deleteUser = catchAsyncHandler(async (req: Request, res: Response) => {
 // ✅ Exported controller object
 export const userController = {
   getAllUsers,
-  getMe,
+  
   updateUser,
   deleteUser,
 }

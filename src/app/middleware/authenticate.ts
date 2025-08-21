@@ -35,7 +35,10 @@ let token: string | undefined;
     token = authHeader.split(" ")[1];
   }
 
-  
+    // 2️⃣ Fallback: get token from cookie
+  if (!token) {
+    token = req.cookies?.accessToken;
+  }
 
   // 3️⃣ No token at all
   if (!token) throw new AppError(401,"Unauthorized: Token missing",);

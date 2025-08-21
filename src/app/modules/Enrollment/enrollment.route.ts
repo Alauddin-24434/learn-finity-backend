@@ -25,4 +25,25 @@ const router = Router();
  */
 router.post("/", authenticate, validateRequest(enrollmentSchema), enrollmentController.enrollUser);
 
+/**
+ * @swagger
+ * /api/enrollments/user/{userId}:
+ *   get:
+ *     summary: Get all enrollments of a user by user ID
+ *     tags: [Enrollments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID of the user
+ *     responses:
+ *       200:
+ *         description: List of enrollments
+ */
+router.get("/user/:userId", authenticate, enrollmentController.getEnrollmentsByUserId);
+
 export const enrollmentRoutes = router;

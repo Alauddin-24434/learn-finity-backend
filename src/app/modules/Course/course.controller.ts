@@ -19,6 +19,7 @@ const createCourse = catchAsyncHandler(async (req: Request, res: Response) => {
   const overviewVideoPublicId = overviewVideoFile?.filename;
 
   const bodyData = { ...req.body, thumbnail, thumbnailPublicId, overviewVideo, overviewVideoPublicId };
+  console.log(bodyData)
   const course = await courseService.createCourse(bodyData);
 
   res.status(201).json({ success: true, message: "Course created successfully", data: course });
@@ -28,6 +29,23 @@ const getCourseById = catchAsyncHandler(async (req: Request, res: Response) => {
   const course = await courseService.getCourseById(req.params.id, req.user?.id as string);
   res.status(200).json({ status: "success", data: course });
 });
+
+
+
+const getCoursesByAuthor = catchAsyncHandler(async (req: Request, res: Response) => {
+    const { authorId } = req.params;
+
+    const courses = await courseService.getCoursesByAuthor(authorId);
+
+    res.status(200).json({
+      success: true,
+      data: courses,
+      message: `Courses by author ${authorId} fetched successfully`,
+    });
+  } )
+
+
+
 
 const getAllCourses = catchAsyncHandler(async (req: Request, res: Response) => {
   const courses = await courseService.getAllCourses(req.query);
@@ -56,4 +74,5 @@ export const courseController = {
   updateCourseById,
   softDeleteCourseById,
   restoreCourseById,
+  getCoursesByAuthor
 };
