@@ -79,21 +79,23 @@ const createCourse = (data) => __awaiter(void 0, void 0, void 0, function* () {
  * Get a course by ID (with related data)
  ===================================================================================================
  */
-const getCourseById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+const getCourseById = (id, userId) => __awaiter(void 0, void 0, void 0, function* () {
     const course = yield prisma_1.prisma.course.findUnique({
         where: { id },
         include: {
             author: true,
             category: true,
             lessons: true,
-            enrollments: true, // we only need the counts
+            enrollments: {
+                where: { userId }, // ✅ শুধু current user এর enrollment চেক
+                select: { id: true }
+            },
         },
     });
     if (!course)
         throw new AppError_1.AppError(404, "Course not found");
-    // Destructure lessons and enrollments, keep the rest
     const { lessons, enrollments } = course, rest = __rest(course, ["lessons", "enrollments"]);
-    return Object.assign(Object.assign({}, rest), { lessonsCount: lessons.length, enrollmentsCount: enrollments.length });
+    return Object.assign(Object.assign({}, rest), { lessonsCount: lessons.length, enrollmentsCount: yield prisma_1.prisma.enrollment.count({ where: { courseId: id } }), isEnrolled: enrollments.length > 0 ? true : false });
 });
 /**
  ==================================================================================================

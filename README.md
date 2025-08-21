@@ -152,9 +152,9 @@ Make sure you have the following installed:
     # URLs where AamarPay will redirect after payment attempts.
     # For development, these should point to your local backend.
     # For production, these should point to your deployed backend URL.
-    SUCCESS_URL=http://localhost:5000/api/payments/success
-    FAIL_URL=http://localhost:5000/api/payments/fail
-    CANCEL_URL=http://localhost:5000/api/payments/cancel
+    SUCCESS_URL=https://learning-platform-backend-production-839d.up.railway.app/api/payments/success
+    FAIL_URL=https://learning-platform-backend-production-839d.up.railway.app/api/payments/fail
+    CANCEL_URL=https://learning-platform-backend-production-839d.up.railway.app/api/payments/cancel
     ```
 
     **Important:** For `DATABASE_URL` and `DIRECT_URL`, you'll need to replace the example values with your actual PostgreSQL connection strings. For development, you can use a local PostgreSQL instance.
@@ -182,7 +182,7 @@ To run the application in development mode with hot-reloading:
 pnpm run dev
 ```
 
-The server will typically run on `http://localhost:5000` (or the `PORT` specified in your `.env` file).
+The server will typically run on `https://learning-platform-backend-production-839d.up.railway.app` (or the `PORT` specified in your `.env` file).
 
 ### Production Mode
 

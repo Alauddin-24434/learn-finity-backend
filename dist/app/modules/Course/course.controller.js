@@ -47,7 +47,9 @@ const createCourse = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __
  ============================================================================================================
  */
 const getCourseById = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const course = yield course_service_1.courseService.getCourseById(req.params.id);
+    var _a;
+    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+    const course = yield course_service_1.courseService.getCourseById(req.params.id, userId);
     res.status(200).json({
         status: "success",
         data: course,

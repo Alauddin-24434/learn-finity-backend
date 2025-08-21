@@ -70,26 +70,9 @@ const getUserDashboardOverview = (userId) => __awaiter(void 0, void 0, void 0, f
         where: { userId, isDeleted: false },
         include: { course: true },
     });
-    const lessonProgress = yield prisma_1.prisma.lessonProgress.findMany({
-        where: { userId, completed: true },
-        include: { lesson: true },
-    });
     const studentPayments = yield prisma_1.prisma.payment.findMany({
         where: { userId, isDeleted: false, status: "PAID" },
     });
-    // Progress per enrolled course
-    const progressPerCourse = yield Promise.all(enrolledCourses.map((enroll) => __awaiter(void 0, void 0, void 0, function* () {
-        const totalLessons = yield prisma_1.prisma.lesson.count({
-            where: { courseId: enroll.courseId, isDeleted: false },
-        });
-        const completedLessons = lessonProgress.filter((lp) => lp.courseId === enroll.courseId).length;
-        return {
-            courseId: enroll.courseId,
-            title: enroll.course.title,
-            completedLessons,
-            totalLessons,
-        };
-    })));
     // --------- CREATOR DATA ----------
     const createdCourses = yield prisma_1.prisma.course.findMany({
         where: { authorId: userId, isDeleted: false },
@@ -125,10 +108,7 @@ const getUserDashboardOverview = (userId) => __awaiter(void 0, void 0, void 0, f
     return {
         // STUDENT INFO
         enrolledCoursesCount: enrolledCourses.length,
-        completedLessonsCount: lessonProgress.length,
-        paymentsMade: studentPayments.length,
         totalSpent: studentPayments.reduce((acc, p) => acc + p.amount, 0),
-        // CREATOR INFO
         createdCoursesCount: createdCourses.length,
         enrollmentsPerCourse,
         totalRevenue,
