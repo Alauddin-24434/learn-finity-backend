@@ -7,6 +7,7 @@ import { notFound } from "./app/middleware/notFound"
 import { initialRoute } from "./app/api"
 import { envVariable } from "./app/config"
 import globalErrorHandler from "./app/middleware/globalErrorHandler"
+import { setupSwagger } from "./app/config/swagger"
 
 const app = express()
 const PORT = envVariable.PORT || 5000
@@ -37,13 +38,15 @@ app.use(morgan(customFormat))
 // 📦 5️⃣ Body Parsers
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-
+// 📖 Swagger Docs
+setupSwagger(app);
 /**
  * 🔄 Routes
  */
 app.get("/", (req, res) => {
   res.json({ status: "OK", message: "Elearning platform is running!" })
 })
+
 
 // API entry
 initialRoute(app)

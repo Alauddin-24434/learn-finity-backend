@@ -1,12 +1,13 @@
 import {Request, Response } from "express";
 import { getAdminDashboardOverview, getUserDashboardOverview } from "./overview.service";
 import { catchAsyncHandler } from "../../utils/catchAsyncHandler";
+import { AppError } from "../../error/AppError";
 
 export const overviewDashboard = catchAsyncHandler(async (req: Request, res: Response) => {
   const user = req.user;
 
   if (!user) {
-    return res.status(401).json({ success: false, message: "Unauthorized" });
+    throw new AppError(404, "User not Found")
   }
 
   if (user.isAdmin) {

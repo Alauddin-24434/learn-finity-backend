@@ -1,20 +1,12 @@
-// services/course.service.ts
-
 import { AppError } from "../../error/AppError";
 import { cloudinary } from "../../lib/cloudinary";
 import { prisma } from "../../lib/prisma";
 import { ICourse } from "./course.interface";
 
 /**
- ===============================================================================
  * Create a new course
- ===============================================================================
  */
 const createCourse = async (data: ICourse) => {
-  let thumbnailPublicId = data.thumbnailPublicId;
-  let overviewVideoPublicId = data.overviewVideoPublicId;
-
-  // Check for duplicate course by the same author
   const exists = await prisma.course.findFirst({
     where: {
       title: data.title,
@@ -25,13 +17,15 @@ const createCourse = async (data: ICourse) => {
     throw new AppError(400, "Course with this title already exists for this author");
   }
 
+  let thumbnailPublicId = data.thumbnailPublicId;
+  let overviewVideoPublicId = data.overviewVideoPublicId;
+
   try {
-    // Create course in DB
     return await prisma.course.create({
       data: {
         title: data.title,
         thumbnail: data.thumbnail,
-        thumbnailPublicId:data.thumbnailPublicId,
+        thumbnailPublicId,
         overviewVideo: data.overviewVideo,
         overviewVideoPublicId,
         price: Number(data.price),
@@ -45,7 +39,6 @@ const createCourse = async (data: ICourse) => {
       },
     });
   } catch (err) {
-    // Rollback uploaded files if DB save fails
     if (thumbnailPublicId) {
       await cloudinary.uploader.destroy(thumbnailPublicId, { resource_type: "image" });
     }
@@ -57,9 +50,7 @@ const createCourse = async (data: ICourse) => {
 };
 
 /**
- =================================================================================================
- * Get a course by ID (with related data)
- ===================================================================================================
+ * Get course by ID (with related data)
  */
 const getCourseById = async (id: string, userId: string) => {
   const course = await prisma.course.findUnique({
@@ -68,31 +59,22 @@ const getCourseById = async (id: string, userId: string) => {
       author: true,
       category: true,
       lessons: true,
-      enrollments: {
-        where: { userId }, // ✅ শুধু current user এর enrollment চেক
-        select: { id: true }
-      },
+      enrollments: { where: { userId }, select: { id: true } },
     },
   });
-
-  if (!course) throw new AppError(404, "Course not found");
+  if (!course || course.isDeleted) throw new AppError(404, "Course not found");
 
   const { lessons, enrollments, ...rest } = course;
-
   return {
     ...rest,
     lessonsCount: lessons.length,
     enrollmentsCount: await prisma.enrollment.count({ where: { courseId: id } }),
-    isEnrolled: enrollments.length > 0 ? true : false, 
+    isEnrolled: enrollments.length > 0,
   };
 };
 
-
-
 /**
- ==================================================================================================
- * Get all courses with pagination, filtering, and sorting
- ========================================================================================================
+ * Get all courses (non-deleted only)
  */
 const getAllCourses = async (query: any) => {
   let { category, searchTerm, sort, page, limit } = query;
@@ -104,128 +86,35 @@ const getAllCourses = async (query: any) => {
   const limitNumber = Number.isNaN(limit) || limit < 1 ? 6 : limit;
   const skip = (pageNumber - 1) * limitNumber;
 
-  const where: any = {};
+  const where: any = { isDeleted: false };
 
-  // Filter by category
-  if (category) {
-    where.category = {
-      name: { contains: category, mode: "insensitive" },
-    };
-  }
+  if (category) where.category = { name: { contains: category, mode: "insensitive" } };
+  if (searchTerm) where.OR = [
+    { title: { contains: searchTerm, mode: "insensitive" } },
+    { description: { contains: searchTerm, mode: "insensitive" } },
+  ];
 
-  // Search by title or description
-  if (searchTerm) {
-    where.OR = [
-      { title: { contains: searchTerm, mode: "insensitive" } },
-      { description: { contains: searchTerm, mode: "insensitive" } },
-    ];
-  }
-
-  // Sorting
   let orderBy = {};
   if (sort === "price-asc") orderBy = { price: "asc" };
   else if (sort === "price-desc") orderBy = { price: "desc" };
   else orderBy = { createdAt: "desc" };
 
-  // Pagination count
   const totalCourses = await prisma.course.count({ where });
 
-  // Fetch paginated data
   const courses = await prisma.course.findMany({
     where,
-    include: {
-      author: true,
-      category: true,
-      lessons: true,
-      enrollments: true,
-    },
+    include: { author: true, category: true, lessons: true, enrollments: true },
     orderBy,
     skip,
     take: limitNumber,
   });
 
-  // Transform to only include counts for lessons & enrollments
-  const coursesWithCounts = courses.map(({ lessons, enrollments, ...rest }) => ({
-    ...rest,
-    lessonsCount: lessons.length,
-    enrollmentsCount: enrollments.length,
-  }));
-
   return {
-    courses: coursesWithCounts,
-    totalPages: Math.ceil(totalCourses / limitNumber),
-    currentPage: pageNumber,
-    totalCourses,
-  };
-};
-
-
-/**
- =============================================================================================================
- * Get courses of a specific author with earnings calculation
- ==============================================================================================================
- */
-const getMyCourses = async (params: any) => {
-  let { category, searchTerm, sort, page, limit, id } = params;
-
-  page = parseInt(page, 10);
-  limit = parseInt(limit, 10);
-
-  const pageNumber = Number.isNaN(page) || page < 1 ? 1 : page;
-  const limitNumber = Number.isNaN(limit) || limit < 1 ? 6 : limit;
-  const skip = (pageNumber - 1) * limitNumber;
-
-  const where: any = {};
-
-  // Filter only by the logged-in author's courses
-  if (id) where.authorId = id;
-
-  if (category) {
-    where.category = {
-      name: { contains: category, mode: "insensitive" },
-    };
-  }
-
-  if (searchTerm) {
-    where.OR = [
-      { title: { contains: searchTerm, mode: "insensitive" } },
-      { description: { contains: searchTerm, mode: "insensitive" } },
-    ];
-  }
-
-  let orderBy = {};
-  if (sort === "price-asc") orderBy = { price: "asc" };
-  else if (sort === "price-desc") orderBy = { price: "desc" };
-  else orderBy = { createdAt: "desc" };
-
-  const totalCourses = await prisma.course.count({ where });
-
-  // Include only paid payments
-  const coursesData = await prisma.course.findMany({
-    where,
-    include: {
-      author: true,
-      category: true,
-      lessons: true,
-      enrollments: true,
-      payments: {
-        where: { status: "PAID" },
-        select: { amount: true, status: true },
-      },
-    },
-    orderBy,
-    skip,
-    take: limitNumber,
-  });
-
-  // Calculate total earnings for each course
-  const courses = coursesData.map(course => ({
-    ...course,
-    totalEarn: course.payments.reduce((sum, payment) => sum + payment.amount, 0),
-  }));
-
-  return {
-    courses,
+    courses: courses.map(({ lessons, enrollments, ...rest }) => ({
+      ...rest,
+      lessonsCount: lessons.length,
+      enrollmentsCount: enrollments.length,
+    })),
     totalPages: Math.ceil(totalCourses / limitNumber),
     currentPage: pageNumber,
     totalCourses,
@@ -233,35 +122,37 @@ const getMyCourses = async (params: any) => {
 };
 
 /**
- ==========================================================================================================
  * Update course by ID
- ===========================================================================================================
  */
 const updateCourseById = async (id: string, data: Partial<ICourse>) => {
   const course = await prisma.course.findUnique({ where: { id } });
-  if (!course) throw new AppError(404, "Course not found");
+  if (!course || course.isDeleted) throw new AppError(404, "Course not found");
   return prisma.course.update({ where: { id }, data });
 };
 
 /**
- ===============================================================================================================
  * Soft delete course by ID
- ================================================================================================================
  */
-const deleteCourseById = async (id: string) => {
+const softDeleteCourseById = async (id: string) => {
+  const course = await prisma.course.findUnique({ where: { id } });
+  if (!course || course.isDeleted) throw new AppError(404, "Course not found");
+  return prisma.course.update({ where: { id }, data: { isDeleted: true } });
+};
+
+/**
+ * Restore soft-deleted course by ID
+ */
+const restoreCourseById = async (id: string) => {
   const course = await prisma.course.findUnique({ where: { id } });
   if (!course) throw new AppError(404, "Course not found");
-  return prisma.course.update({
-    where: { id },
-    data: { isDeleted: true },
-  });
+  return prisma.course.update({ where: { id }, data: { isDeleted: false } });
 };
 
 export const courseService = {
   createCourse,
   getCourseById,
   getAllCourses,
-  getMyCourses,
   updateCourseById,
-  deleteCourseById,
+  softDeleteCourseById,
+  restoreCourseById,
 };

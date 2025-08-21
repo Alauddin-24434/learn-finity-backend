@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 import { catchAsyncHandler } from "../utils/catchAsyncHandler"
 import { envVariable } from "../config"
 import { prisma } from "../lib/prisma"
+import { AppError } from "../error/AppError"
 
 interface JwtDecodedPayload {
   id: string
@@ -25,14 +26,21 @@ declare global {
 
 export const authenticate = catchAsyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   
-  const token = req.headers.authorization
+let token: string | undefined;
+
+
+  // 1️⃣ Try getting token from Authorization header
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  }
 
   
 
-  if (!token) {
-    return res.status(401).json({ message: "Unauthorized: Token missing" })
-  }
+  // 3️⃣ No token at all
+  if (!token) throw new AppError(401,"Unauthorized: Token missing",);
 
+  
   let decoded: JwtDecodedPayload
   try {
     decoded = jwt.verify(token, envVariable.JWT_ACCESS_TOKEN_SECRET as string, {

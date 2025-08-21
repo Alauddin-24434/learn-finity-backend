@@ -3,9 +3,9 @@ import { authRoutes } from "../modules/Auth/auth.route"
 
 import { paymentRoutes } from "../modules/Payment/payment.route"
 
-import { userRoutes } from "../modules/User/user.routes"
+import { userRoutes } from "../modules/User/user.route"
 
-import { courseRoutes } from "../modules/Course/course.routes"
+import { courseRoutes } from "../modules/Course/course.route"
 import { lessonRoutes } from "../modules/Lession/lession.route"
 import { categoryRoutes } from "../modules/Category/category.route"
 import { enrollmentRoutes } from "../modules/Enrollment/enrollment.route"
