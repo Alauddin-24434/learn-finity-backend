@@ -14,7 +14,7 @@ router.post("/", upload.fields([{ name: "thumbnail", maxCount: 1 },
 { name: "overviewVideo", maxCount: 1 },]), validateRequest(createCourseZodSchema), courseController.createCourse);
 router.get("/", courseController.getAllCourses);
 router.get("/my-courses", authenticate, courseController.getMyCourses);
-router.get("/:id", courseController.getCourseById);
+router.get("/:id", authenticate, courseController.getCourseById);
 router.patch("/:id", courseController.updateCourseById);
 router.delete("/:id", courseController.deleteCourseById);
 

@@ -4,26 +4,26 @@ export const generatePaymentHtml = (
   let title = "",
     message = "",
     color = "",
-    emoji = "",
+    
     shadow = "";
 
   switch (status) {
     case "success":
-      emoji = "✅";
+      
       title = "Payment Successful!";
       message = `Your transaction was completed successfully. Enjoy your purchase!`;
       color = "#28a745"; // A more vibrant green
       shadow = "0 10px 30px rgba(40, 167, 69, 0.2)"; // Softer shadow for success
       break;
     case "failed":
-      emoji = "❌";
+
       title = "Payment Failed";
       message = "Unfortunately, your payment could not be processed. Please try again or use a different method.";
       color = "#dc3545"; // A standard, clear red
       shadow = "0 10px 30px rgba(220, 53, 69, 0.2)"; // Softer shadow for failed
       break;
     case "cancelled":
-      emoji = "⚠️";
+      
       title = "Payment Cancelled";
       message = "Your payment was cancelled. If this was unintentional, please try again.";
       color = "#ffc107"; // A clear, warning yellow/orange
@@ -145,7 +145,7 @@ export const generatePaymentHtml = (
     </head>
     <body>
       <div class="container">
-        <div class="emoji">${emoji}</div>
+      
         <h1>${title}</h1>
         <p>${message}</p>
         <a class="button" href="https://elearning-platform-phi.vercel.app">⬅️ Back to Home</a>

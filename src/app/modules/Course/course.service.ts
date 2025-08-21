@@ -61,28 +61,32 @@ const createCourse = async (data: ICourse) => {
  * Get a course by ID (with related data)
  ===================================================================================================
  */
-const getCourseById = async (id: string) => {
+const getCourseById = async (id: string, userId: string) => {
   const course = await prisma.course.findUnique({
     where: { id },
     include: {
       author: true,
       category: true,
       lessons: true,
-      enrollments: true, // we only need the counts
+      enrollments: {
+        where: { userId }, // ✅ শুধু current user এর enrollment চেক
+        select: { id: true }
+      },
     },
   });
 
   if (!course) throw new AppError(404, "Course not found");
 
-  // Destructure lessons and enrollments, keep the rest
   const { lessons, enrollments, ...rest } = course;
 
   return {
     ...rest,
     lessonsCount: lessons.length,
-    enrollmentsCount: enrollments.length,
+    enrollmentsCount: await prisma.enrollment.count({ where: { courseId: id } }),
+    isEnrolled: enrollments.length > 0 ? true : false, 
   };
 };
+
 
 
 /**

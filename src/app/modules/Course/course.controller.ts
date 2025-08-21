@@ -56,7 +56,8 @@ const createCourse = catchAsyncHandler(async (req: Request, res: Response) => {
  ============================================================================================================
  */
 const getCourseById = catchAsyncHandler(async (req: Request, res: Response) => {
-  const course = await courseService.getCourseById(req.params.id);
+  const userId=req.user?.id;
+  const course = await courseService.getCourseById(req.params.id, userId as string);
   res.status(200).json({
     status: "success",
     data: course,

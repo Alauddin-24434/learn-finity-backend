@@ -71,33 +71,13 @@ export const getUserDashboardOverview = async (userId: string) => {
     include: { course: true },
   });
 
-  const lessonProgress = await prisma.lessonProgress.findMany({
-    where: { userId, completed: true },
-    include: { lesson: true },
-  });
+  
 
   const studentPayments = await prisma.payment.findMany({
     where: { userId, isDeleted: false, status: "PAID" },
   });
 
-  // Progress per enrolled course
-  const progressPerCourse = await Promise.all(
-    enrolledCourses.map(async (enroll) => {
-      const totalLessons = await prisma.lesson.count({
-        where: { courseId: enroll.courseId, isDeleted: false },
-      });
-      const completedLessons = lessonProgress.filter(
-        (lp) => lp.courseId === enroll.courseId
-      ).length;
 
-      return {
-        courseId: enroll.courseId,
-        title: enroll.course.title,
-        completedLessons,
-        totalLessons,
-      };
-    })
-  );
 
   // --------- CREATOR DATA ----------
   const createdCourses = await prisma.course.findMany({
@@ -152,11 +132,9 @@ export const getUserDashboardOverview = async (userId: string) => {
   return {
     // STUDENT INFO
     enrolledCoursesCount: enrolledCourses.length,
-    completedLessonsCount: lessonProgress.length,
-    paymentsMade: studentPayments.length,
     totalSpent: studentPayments.reduce((acc, p) => acc + p.amount, 0),
+   
     
-    // CREATOR INFO
     createdCoursesCount: createdCourses.length,
     enrollmentsPerCourse,
     totalRevenue,
