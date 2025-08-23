@@ -148,7 +148,7 @@ export const generatePaymentHtml = (
       
         <h1>${title}</h1>
         <p>${message}</p>
-        <a class="button" href="https://elearning-platform-phi.vercel.app">⬅️ Back to Home</a>
+        <a class="button" href="https://learn-finity.vercel.app">⬅️ Back to Home</a>
       </div>
     </body>
     </html>
