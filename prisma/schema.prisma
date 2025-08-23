@@ -29,11 +29,8 @@ model User {
   courseEnrollments Enrollment[]
   // A user can make many payments.
   payments          Payment[]
-  // A user can write many reviews.
-  reviews           Review[]
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
-  LessonProgress    LessonProgress[]
 }
 
 // Category model for organizing courses.
@@ -51,11 +48,9 @@ model Course {
   title                 String
   description           String
   thumbnail             String
-  thumbnailPublicId     String
   overviewVideo         String
-  overviewVideoPublicId String
-  price                 Int     @default(0)
-  isFree                Boolean @default(false)
+  price                 Int    
+  isFree                Boolean 
   categoryId            String
   authorId              String
 
@@ -89,7 +84,6 @@ model Lesson {
   title         String
   duration      String
   video         String
-  videoPublicId String
   courseId      String
   // Relation to the parent course.
   course        Course @relation(fields: [courseId], references: [id])
@@ -106,8 +100,6 @@ model LessonProgress {
   lessonId  String
   courseId  String
   completed Boolean @default(false)
-
-  user   User   @relation(fields: [userId], references: [id])
   lesson Lesson @relation(fields: [lessonId], references: [id])
 
   @@unique([userId, lessonId])
@@ -157,8 +149,6 @@ model Review {
 
   // Relation to the course being reviewed.
   course    Course  @relation(fields: [courseId], references: [id])
-  // Relation to the user who wrote the review.
-  user      User    @relation(fields: [userId], references: [id])
   isDeleted Boolean @default(false)
 }
 

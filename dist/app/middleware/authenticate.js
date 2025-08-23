@@ -17,11 +17,22 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const catchAsyncHandler_1 = require("../utils/catchAsyncHandler");
 const config_1 = require("../config");
 const prisma_1 = require("../lib/prisma");
+const AppError_1 = require("../error/AppError");
 exports.authenticate = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = req.headers.authorization;
-    if (!token) {
-        return res.status(401).json({ message: "Unauthorized: Token missing" });
+    var _a;
+    let token;
+    // 1️⃣ Try getting token from Authorization header
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.split(" ")[1];
     }
+    // 2️⃣ Fallback: get token from cookie
+    if (!token) {
+        token = (_a = req.cookies) === null || _a === void 0 ? void 0 : _a.accessToken;
+    }
+    // 3️⃣ No token at all
+    if (!token)
+        throw new AppError_1.AppError(401, "Unauthorized: Token missing");
     let decoded;
     try {
         decoded = jsonwebtoken_1.default.verify(token, config_1.envVariable.JWT_ACCESS_TOKEN_SECRET, {

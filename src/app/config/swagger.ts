@@ -29,7 +29,7 @@ export const setupSwagger = (app: Application) => {
         { bearerAuth: [] } // applies globally to all routes
       ],
     },
-    apis: ["./src/app/modules/**/*.route.ts"], // dynamically load all route docs
+    apis: ["./src/app/routes/**/*.route.ts"], // dynamically load all route docs
   };
 
   const specs = swaggerJsdoc(options);

@@ -36,7 +36,7 @@ const globalErrorHandler: ErrorRequestHandler = (error: Error, req: Request, res
   // --------------------
   else if (error instanceof PrismaClientKnownRequestError) {
 
-    console.log("p", error)
+  
     status = 400
     name = "PrismaClientKnownRequestError"
     switch (error.code) {

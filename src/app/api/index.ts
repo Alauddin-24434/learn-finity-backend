@@ -1,15 +1,15 @@
 import type { Application } from "express"
-import { authRoutes } from "../modules/Auth/auth.route"
+import { authRoutes } from "../routes/auth.route"
 
-import { paymentRoutes } from "../modules/Payment/payment.route"
+import { paymentRoutes } from "../routes/payment.route"
 
-import { userRoutes } from "../modules/User/user.route"
+import { userRoutes } from "../routes/user.route"
 
-import { courseRoutes } from "../modules/Course/course.route"
-import { lessonRoutes } from "../modules/Lession/lession.route"
-import { categoryRoutes } from "../modules/Category/category.route"
-import { enrollmentRoutes } from "../modules/Enrollment/enrollment.route"
-import { dashboardRoute } from "../modules/Dashboard/overview.route"
+import { courseRoutes } from "../routes/course.route"
+import { lessonRoutes } from "../routes/lession.route"
+import { categoryRoutes } from "../routes/category.route"
+import { enrollmentRoutes } from "../routes/enrollment.route"
+import { dashboardRoute } from "../routes/overview.route"
 
 const moduleRoutes = [
   {

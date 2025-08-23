@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initialRoute = void 0;
-const auth_route_1 = require("../modules/Auth/auth.route");
-const payment_route_1 = require("../modules/Payment/payment.route");
-const user_routes_1 = require("../modules/User/user.routes");
-const course_routes_1 = require("../modules/Course/course.routes");
-const lession_route_1 = require("../modules/Lession/lession.route");
-const category_route_1 = require("../modules/Category/category.route");
-const enrollment_route_1 = require("../modules/Enrollment/enrollment.route");
-const overview_route_1 = require("../modules/Dashboard/overview.route");
+const auth_route_1 = require("../routes/auth.route");
+const payment_route_1 = require("../routes/payment.route");
+const user_route_1 = require("../routes/user.route");
+const course_route_1 = require("../routes/course.route");
+const lession_route_1 = require("../routes/lession.route");
+const category_route_1 = require("../routes/category.route");
+const enrollment_route_1 = require("../routes/enrollment.route");
+const overview_route_1 = require("../routes/overview.route");
 const moduleRoutes = [
     {
         path: "/api/auth",
@@ -16,11 +16,11 @@ const moduleRoutes = [
     },
     {
         path: "/api/users",
-        route: user_routes_1.userRoutes,
+        route: user_route_1.userRoutes,
     },
     {
         path: "/api/courses",
-        route: course_routes_1.courseRoutes,
+        route: course_route_1.courseRoutes,
     },
     {
         path: "/api/lessons",

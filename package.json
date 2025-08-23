@@ -6,9 +6,7 @@
   "scripts": {
     "build": "tsc",
     "prod": "node dist/server.js",
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "seed": "ts-node-dev --respawn --transpile-only src/seed.ts ",
-    "test": "jest"
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
   },
   "keywords": [],
   "author": "",
