@@ -14,22 +14,18 @@ const createCourse = async (data: ICourse) => {
     where: {
       title: data.title,
       authorId: data.authorId,
+      isDeleted: false, // prevent duplicate check on deleted course
     },
   });
   if (exists) throw new AppError(400, "Course with this title already exists for this author");
 
-  let thumbnailPublicId = data.thumbnailPublicId;
-  let overviewVideoPublicId = data.overviewVideoPublicId;
-
-  return await prisma.course.create({
+  return prisma.course.create({
     data: {
       title: data.title,
       thumbnail: data.thumbnail,
-      thumbnailPublicId,
       overviewVideo: data.overviewVideo,
-      overviewVideoPublicId,
       price: Number(data.price),
-      isFree: Boolean(data.isFree),
+      isFree: data.isFree ? true : false,
       description: data.description,
       authorId: data.authorId,
       categoryId: data.categoryId,
@@ -44,12 +40,12 @@ const createCourse = async (data: ICourse) => {
  * @desc Get course by ID with lessons, author, category, and enrollment info
  * @param id - Course ID
  * @param userId - User ID (to check enrollment)
- * @returns Course object with additional fields: lessonsCount, enrollmentsCount, isEnrolled
+ * @returns Course object with lessonsCount, enrollmentsCount, isEnrolled
  * @throws AppError if course not found or deleted
  */
 const getCourseById = async (id: string, userId: string) => {
   const course = await prisma.course.findUnique({
-    where: { id },
+    where: { id, isDeleted: false }, // ✅ only active courses
     include: {
       author: true,
       category: true,
@@ -57,7 +53,7 @@ const getCourseById = async (id: string, userId: string) => {
       enrollments: { where: { userId }, select: { id: true } },
     },
   });
-  if (!course || course.isDeleted) throw new AppError(404, "Course not found");
+  if (!course) throw new AppError(404, "Course not found");
 
   const { lessons, enrollments, ...rest } = course;
   return {
@@ -69,9 +65,9 @@ const getCourseById = async (id: string, userId: string) => {
 };
 
 /**
- * @desc Get all courses with optional filters, pagination, and sorting
- * @param query - Filter and pagination params (category, searchTerm, sort, page, limit)
- * @returns Object with courses array, totalPages, currentPage, totalCourses
+ * @desc Get all courses with filters, pagination, sorting
+ * @param query - category, searchTerm, sort, page, limit
+ * @returns Object with courses, totalPages, currentPage, totalCourses
  */
 const getAllCourses = async (query: any) => {
   let { category, searchTerm, sort, page, limit } = query;
@@ -83,13 +79,17 @@ const getAllCourses = async (query: any) => {
   const limitNumber = Number.isNaN(limit) || limit < 1 ? 6 : limit;
   const skip = (pageNumber - 1) * limitNumber;
 
-  const where: any = { isDeleted: false };
+  const where: any = { isDeleted: false }; // ✅ only active courses
 
-  if (category) where.category = { name: { contains: category, mode: "insensitive" } };
-  if (searchTerm) where.OR = [
-    { title: { contains: searchTerm, mode: "insensitive" } },
-    { description: { contains: searchTerm, mode: "insensitive" } },
-  ];
+  if (category) {
+    where.category = { name: { contains: category, mode: "insensitive" } };
+  }
+  if (searchTerm) {
+    where.OR = [
+      { title: { contains: searchTerm, mode: "insensitive" } },
+      { description: { contains: searchTerm, mode: "insensitive" } },
+    ];
+  }
 
   let orderBy = {};
   if (sort === "price-asc") orderBy = { price: "asc" };
@@ -124,44 +124,57 @@ const getAllCourses = async (query: any) => {
  * @returns Array of courses with author, category, and lessons
  */
 const getCoursesByAuthor = async (authorId: string) => {
-  const courses = await prisma.course.findMany({
-    where: { authorId },
+  return prisma.course.findMany({
+    where: { authorId, isDeleted: false }, // ✅ only active courses
     include: {
       author: true,
       category: true,
       lessons: true,
     },
   });
-  return courses;
 };
 
 /**
  * @desc Update course by ID
  * @param id - Course ID
- * @param data - Partial course data to update
+ * @param data - Partial course data
  * @returns Updated course object
  * @throws AppError if course not found or deleted
  */
-const updateCourseById = async (id: string, data: Partial<ICourse>) => {
-  const course = await prisma.course.findUnique({ where: { id } });
-  if (!course || course.isDeleted) throw new AppError(404, "Course not found");
+const updateCourseById = async (id: string, data: ICourse) => {
+  console.log("data1",data)
+  const course = await prisma.course.findUnique({ where: { id, isDeleted: false } });
+  if (!course) throw new AppError(404, "Course not found");
+
   return prisma.course.update({ where: { id }, data });
 };
 
 /**
- * @desc Soft delete course by ID (marks isDeleted = true)
+ * @desc Soft delete a course by ID (sets isDeleted = true)
+ * @param authorId - Course author's ID
  * @param id - Course ID
  * @returns Updated course object
- * @throws AppError if course not found or already deleted
+ * @throws AppError if not found, already deleted, or unauthorized
  */
-const softDeleteCourseById = async (id: string) => {
+const softDeleteCourseById = async (authorId: string, id: string) => {
   const course = await prisma.course.findUnique({ where: { id } });
-  if (!course || course.isDeleted) throw new AppError(404, "Course not found");
-  return prisma.course.update({ where: { id }, data: { isDeleted: true } });
+
+  if (!course || course.isDeleted) {
+    throw new AppError(404, "Course not found");
+  }
+
+  if (course.authorId !== authorId) {
+    throw new AppError(403, "You are not authorized to delete this course");
+  }
+
+  return prisma.course.update({
+    where: { id },
+    data: { isDeleted: true },
+  });
 };
 
 /**
- * @desc Restore a soft-deleted course by ID (marks isDeleted = false)
+ * @desc Restore a soft-deleted course by ID
  * @param id - Course ID
  * @returns Updated course object
  * @throws AppError if course not found
@@ -169,15 +182,19 @@ const softDeleteCourseById = async (id: string) => {
 const restoreCourseById = async (id: string) => {
   const course = await prisma.course.findUnique({ where: { id } });
   if (!course) throw new AppError(404, "Course not found");
-  return prisma.course.update({ where: { id }, data: { isDeleted: false } });
+
+  return prisma.course.update({
+    where: { id },
+    data: { isDeleted: false },
+  });
 };
 
 export const courseService = {
   createCourse,
   getCourseById,
   getAllCourses,
+  getCoursesByAuthor,
   updateCourseById,
   softDeleteCourseById,
   restoreCourseById,
-  getCoursesByAuthor,
 };

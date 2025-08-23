@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma"
 import { AppError } from "../error/AppError"
 
 import type { ILoginUser, IRegisterUser } from "../interfaces/auth.interface"
+import { IUser } from "../interfaces/user.interfcae"
 
 /**
  * @desc Register a new user
@@ -56,6 +57,7 @@ const loginUser = async (loginData: ILoginUser) => {
       email: true,
       isAdmin: true,
       password: true,
+      avatar:true,
     },
   })
   if (!user) throw new AppError(400, "Invalid email or password")
@@ -69,7 +71,13 @@ const loginUser = async (loginData: ILoginUser) => {
   return userWithoutPassword
 }
 
+
+
+
 export const AuthService = {
   registerUser,
   loginUser,
 }
+
+
+

@@ -3,10 +3,7 @@ export interface ICourse {
   title: string;
   description: string;
   thumbnail: string;
-  thumbnailPublicId: string;
   overviewVideo: string;
-  overviewVideoPublicId: string;
-
   price: number;
   isFree: boolean;
   authorId: string;

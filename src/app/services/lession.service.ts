@@ -11,25 +11,17 @@ import { cloudinary } from "../lib/cloudinary"
  * @throws Throws error if DB operation fails
  */
 const createLessonIntoDB = async (payload: ILesson) => {
-  let videoPublicId = payload.videoPublicId
 
-  try {
     return await prisma.lesson.create({
       data: {
         title: payload.title,
         duration: payload.duration,
         courseId: payload.courseId,
         video: payload.video,
-        videoPublicId,
+        
       },
     })
-  } catch (err) {
-    // Rollback uploaded video if DB creation fails
-    if (videoPublicId) {
-      await cloudinary.uploader.destroy(videoPublicId, { resource_type: "video" })
-    }
-    throw err
-  }
+
 }
 
 /**

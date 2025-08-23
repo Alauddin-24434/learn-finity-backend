@@ -26,10 +26,14 @@ const router = express.Router();
 router.post(
   "/",
   authenticate,
-  upload.fields([{ name: "thumbnail", maxCount: 1 }, { name: "overviewVideo", maxCount: 1 }]),
-  validateRequest(createCourseZodSchema),
+  // validateRequest(createCourseZodSchema),
+  upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "overviewVideo", maxCount: 1 },
+  ]),
   courseController.createCourse
 );
+
 
 /**
  * @swagger
@@ -125,7 +129,7 @@ router.get("/author/:authorId", authenticate, courseController.getCoursesByAutho
  *     security:
  *       - bearerAuth: []
  */
-router.patch("/:id/delete", authenticate, courseController.softDeleteCourseById);
+router.delete("/:id/delete", authenticate, courseController.softDeleteCourseById);
 
 /**
  * @swagger

@@ -38,6 +38,8 @@ const register = catchAsyncHandler(async (req: Request, res: Response) => {
  * @access Public
  */
 const login = catchAsyncHandler(async (req: Request, res: Response) => {
+
+
   const user = await AuthService.loginUser(req.body)
 
   const jwtPayload = { id: user.id, email: user.email }

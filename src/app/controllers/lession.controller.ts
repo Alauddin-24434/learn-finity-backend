@@ -18,7 +18,7 @@ const createLesson = catchAsyncHandler(async (req: Request, res: Response) => {
   const body = {
     ...req.body,
     video: videoFile?.path,
-    videoPublicId: videoFile?.filename,
+  
   };
 
   const lesson = await lessonService.createLessonIntoDB(body);

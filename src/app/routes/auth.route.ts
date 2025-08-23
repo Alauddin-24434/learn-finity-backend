@@ -69,7 +69,7 @@ router.post(
  *       200: { description: Access token refreshed successfully }
  *       401: { description: Invalid or expired refresh token }
  */
-router.get("/refresh-token", AuthController.refreshAccessToken)
+router.post("/refresh-token", AuthController.refreshAccessToken)
 
 /**
  * @swagger

@@ -14,14 +14,13 @@ const createCourse = catchAsyncHandler(async (req: Request, res: Response) => {
   const overviewVideoFile = files?.overviewVideo?.[0];
 
   const thumbnail = thumbnailFile?.path;
-  const thumbnailPublicId = thumbnailFile?.filename;
   const overviewVideo = overviewVideoFile?.path;
-  const overviewVideoPublicId = overviewVideoFile?.filename;
 
-  const bodyData = { ...req.body, thumbnail, thumbnailPublicId, overviewVideo, overviewVideoPublicId };
+
+  const bodyData = { ...req.body, thumbnail , overviewVideo };
   console.log(bodyData)
   const course = await courseService.createCourse(bodyData);
-
+console.log("save",course)
   res.status(201).json({ success: true, message: "Course created successfully", data: course });
 });
 
@@ -53,12 +52,15 @@ const getAllCourses = catchAsyncHandler(async (req: Request, res: Response) => {
 });
 
 const updateCourseById = catchAsyncHandler(async (req: Request, res: Response) => {
-  const course = await courseService.updateCourseById(req.params.id, req.body);
+  console.log("req=>",req.body)
+  const id= req.params.id;
+  const course = await courseService.updateCourseById(id, req.body);
   res.status(200).json({ status: "success", data: course });
 });
 
 const softDeleteCourseById = catchAsyncHandler(async (req: Request, res: Response) => {
-  await courseService.softDeleteCourseById(req.params.id);
+  const authorId = req.user?.id;
+  await courseService.softDeleteCourseById(authorId  as string,req.params.id);
   res.status(200).json({ status: "success", message: "Course soft-deleted successfully" });
 });
 

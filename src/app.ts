@@ -10,7 +10,7 @@ import globalErrorHandler from "./app/middleware/globalErrorHandler"
 import { setupSwagger } from "./app/config/swagger"
 
 const app = express()
-const PORT = envVariable.PORT || 5000
+const PORT = envVariable.PORT || 5000;
 // const clientURL = envVariable.CLIENT_URL || "http://localhost:3000"
 
 /**
@@ -46,6 +46,7 @@ setupSwagger(app);
 app.get("/", (req, res) => {
   res.json({ status: "OK", message: "Elearning platform is running!" })
 })
+
 
 
 // API entry
