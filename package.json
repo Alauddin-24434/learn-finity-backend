@@ -2,10 +2,10 @@
   "name": "learning",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/server.js",
+  "main": "dist/app.js",
   "scripts": {
     "build": "tsc",
-    "prod": "node dist/server.js",
+    "prod": "node dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
   },
   "keywords": [],

@@ -34,21 +34,18 @@ const createCourse = (data) => __awaiter(void 0, void 0, void 0, function* () {
         where: {
             title: data.title,
             authorId: data.authorId,
+            isDeleted: false, // prevent duplicate check on deleted course
         },
     });
     if (exists)
         throw new AppError_1.AppError(400, "Course with this title already exists for this author");
-    let thumbnailPublicId = data.thumbnailPublicId;
-    let overviewVideoPublicId = data.overviewVideoPublicId;
-    return yield prisma_1.prisma.course.create({
+    return prisma_1.prisma.course.create({
         data: {
             title: data.title,
             thumbnail: data.thumbnail,
-            thumbnailPublicId,
             overviewVideo: data.overviewVideo,
-            overviewVideoPublicId,
             price: Number(data.price),
-            isFree: Boolean(data.isFree),
+            isFree: data.isFree ? true : false,
             description: data.description,
             authorId: data.authorId,
             categoryId: data.categoryId,
@@ -62,12 +59,12 @@ const createCourse = (data) => __awaiter(void 0, void 0, void 0, function* () {
  * @desc Get course by ID with lessons, author, category, and enrollment info
  * @param id - Course ID
  * @param userId - User ID (to check enrollment)
- * @returns Course object with additional fields: lessonsCount, enrollmentsCount, isEnrolled
+ * @returns Course object with lessonsCount, enrollmentsCount, isEnrolled
  * @throws AppError if course not found or deleted
  */
 const getCourseById = (id, userId) => __awaiter(void 0, void 0, void 0, function* () {
     const course = yield prisma_1.prisma.course.findUnique({
-        where: { id },
+        where: { id, isDeleted: false }, // ✅ only active courses
         include: {
             author: true,
             category: true,
@@ -75,15 +72,15 @@ const getCourseById = (id, userId) => __awaiter(void 0, void 0, void 0, function
             enrollments: { where: { userId }, select: { id: true } },
         },
     });
-    if (!course || course.isDeleted)
+    if (!course)
         throw new AppError_1.AppError(404, "Course not found");
     const { lessons, enrollments } = course, rest = __rest(course, ["lessons", "enrollments"]);
     return Object.assign(Object.assign({}, rest), { lessonsCount: lessons.length, enrollmentsCount: yield prisma_1.prisma.enrollment.count({ where: { courseId: id } }), isEnrolled: enrollments.length > 0 });
 });
 /**
- * @desc Get all courses with optional filters, pagination, and sorting
- * @param query - Filter and pagination params (category, searchTerm, sort, page, limit)
- * @returns Object with courses array, totalPages, currentPage, totalCourses
+ * @desc Get all courses with filters, pagination, sorting
+ * @param query - category, searchTerm, sort, page, limit
+ * @returns Object with courses, totalPages, currentPage, totalCourses
  */
 const getAllCourses = (query) => __awaiter(void 0, void 0, void 0, function* () {
     let { category, searchTerm, sort, page, limit } = query;
@@ -92,14 +89,16 @@ const getAllCourses = (query) => __awaiter(void 0, void 0, void 0, function* () 
     const pageNumber = Number.isNaN(page) || page < 1 ? 1 : page;
     const limitNumber = Number.isNaN(limit) || limit < 1 ? 6 : limit;
     const skip = (pageNumber - 1) * limitNumber;
-    const where = { isDeleted: false };
-    if (category)
+    const where = { isDeleted: false }; // ✅ only active courses
+    if (category) {
         where.category = { name: { contains: category, mode: "insensitive" } };
-    if (searchTerm)
+    }
+    if (searchTerm) {
         where.OR = [
             { title: { contains: searchTerm, mode: "insensitive" } },
             { description: { contains: searchTerm, mode: "insensitive" } },
         ];
+    }
     let orderBy = {};
     if (sort === "price-asc")
         orderBy = { price: "asc" };
@@ -131,43 +130,51 @@ const getAllCourses = (query) => __awaiter(void 0, void 0, void 0, function* () 
  * @returns Array of courses with author, category, and lessons
  */
 const getCoursesByAuthor = (authorId) => __awaiter(void 0, void 0, void 0, function* () {
-    const courses = yield prisma_1.prisma.course.findMany({
-        where: { authorId },
+    return prisma_1.prisma.course.findMany({
+        where: { authorId, isDeleted: false }, // ✅ only active courses
         include: {
             author: true,
             category: true,
             lessons: true,
         },
     });
-    return courses;
 });
 /**
  * @desc Update course by ID
  * @param id - Course ID
- * @param data - Partial course data to update
+ * @param data - Partial course data
  * @returns Updated course object
  * @throws AppError if course not found or deleted
  */
 const updateCourseById = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
-    const course = yield prisma_1.prisma.course.findUnique({ where: { id } });
-    if (!course || course.isDeleted)
+    console.log("data1", data);
+    const course = yield prisma_1.prisma.course.findUnique({ where: { id, isDeleted: false } });
+    if (!course)
         throw new AppError_1.AppError(404, "Course not found");
     return prisma_1.prisma.course.update({ where: { id }, data });
 });
 /**
- * @desc Soft delete course by ID (marks isDeleted = true)
+ * @desc Soft delete a course by ID (sets isDeleted = true)
+ * @param authorId - Course author's ID
  * @param id - Course ID
  * @returns Updated course object
- * @throws AppError if course not found or already deleted
+ * @throws AppError if not found, already deleted, or unauthorized
  */
-const softDeleteCourseById = (id) => __awaiter(void 0, void 0, void 0, function* () {
+const softDeleteCourseById = (authorId, id) => __awaiter(void 0, void 0, void 0, function* () {
     const course = yield prisma_1.prisma.course.findUnique({ where: { id } });
-    if (!course || course.isDeleted)
+    if (!course || course.isDeleted) {
         throw new AppError_1.AppError(404, "Course not found");
-    return prisma_1.prisma.course.update({ where: { id }, data: { isDeleted: true } });
+    }
+    if (course.authorId !== authorId) {
+        throw new AppError_1.AppError(403, "You are not authorized to delete this course");
+    }
+    return prisma_1.prisma.course.update({
+        where: { id },
+        data: { isDeleted: true },
+    });
 });
 /**
- * @desc Restore a soft-deleted course by ID (marks isDeleted = false)
+ * @desc Restore a soft-deleted course by ID
  * @param id - Course ID
  * @returns Updated course object
  * @throws AppError if course not found
@@ -176,14 +183,17 @@ const restoreCourseById = (id) => __awaiter(void 0, void 0, void 0, function* ()
     const course = yield prisma_1.prisma.course.findUnique({ where: { id } });
     if (!course)
         throw new AppError_1.AppError(404, "Course not found");
-    return prisma_1.prisma.course.update({ where: { id }, data: { isDeleted: false } });
+    return prisma_1.prisma.course.update({
+        where: { id },
+        data: { isDeleted: false },
+    });
 });
 exports.courseService = {
     createCourse,
     getCourseById,
     getAllCourses,
+    getCoursesByAuthor,
     updateCourseById,
     softDeleteCourseById,
     restoreCourseById,
-    getCoursesByAuthor,
 };

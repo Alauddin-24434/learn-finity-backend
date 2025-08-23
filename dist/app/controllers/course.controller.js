@@ -18,12 +18,11 @@ const createCourse = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __
     const thumbnailFile = (_a = files === null || files === void 0 ? void 0 : files.thumbnail) === null || _a === void 0 ? void 0 : _a[0];
     const overviewVideoFile = (_b = files === null || files === void 0 ? void 0 : files.overviewVideo) === null || _b === void 0 ? void 0 : _b[0];
     const thumbnail = thumbnailFile === null || thumbnailFile === void 0 ? void 0 : thumbnailFile.path;
-    const thumbnailPublicId = thumbnailFile === null || thumbnailFile === void 0 ? void 0 : thumbnailFile.filename;
     const overviewVideo = overviewVideoFile === null || overviewVideoFile === void 0 ? void 0 : overviewVideoFile.path;
-    const overviewVideoPublicId = overviewVideoFile === null || overviewVideoFile === void 0 ? void 0 : overviewVideoFile.filename;
-    const bodyData = Object.assign(Object.assign({}, req.body), { thumbnail, thumbnailPublicId, overviewVideo, overviewVideoPublicId });
+    const bodyData = Object.assign(Object.assign({}, req.body), { thumbnail, overviewVideo });
     console.log(bodyData);
     const course = yield course_service_1.courseService.createCourse(bodyData);
+    console.log("save", course);
     res.status(201).json({ success: true, message: "Course created successfully", data: course });
 }));
 const getCourseById = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -45,11 +44,15 @@ const getAllCourses = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => _
     res.status(200).json({ status: "success", data: courses });
 }));
 const updateCourseById = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const course = yield course_service_1.courseService.updateCourseById(req.params.id, req.body);
+    console.log("req=>", req.body);
+    const id = req.params.id;
+    const course = yield course_service_1.courseService.updateCourseById(id, req.body);
     res.status(200).json({ status: "success", data: course });
 }));
 const softDeleteCourseById = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    yield course_service_1.courseService.softDeleteCourseById(req.params.id);
+    var _a;
+    const authorId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+    yield course_service_1.courseService.softDeleteCourseById(authorId, req.params.id);
     res.status(200).json({ status: "success", message: "Course soft-deleted successfully" });
 }));
 const restoreCourseById = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

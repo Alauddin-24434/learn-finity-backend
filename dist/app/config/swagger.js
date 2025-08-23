@@ -33,7 +33,7 @@ const setupSwagger = (app) => {
                 { bearerAuth: [] } // applies globally to all routes
             ],
         },
-        apis: ["./src/app/modules/**/*.route.ts"], // dynamically load all route docs
+        apis: ["./src/app/routes/**/*.route.ts"], // dynamically load all route docs
     };
     const specs = (0, swagger_jsdoc_1.default)(options);
     app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(specs));

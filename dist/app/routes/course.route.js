@@ -8,8 +8,6 @@ const express_1 = __importDefault(require("express"));
 const course_controller_1 = require("../controllers/course.controller");
 const authenticate_1 = require("../middleware/authenticate");
 const cloudinary_1 = require("../lib/cloudinary");
-const validateRequest_1 = require("../middleware/validateRequest");
-const course_validation_1 = require("../validations/course.validation");
 const router = express_1.default.Router();
 /**
  * @swagger
@@ -26,7 +24,12 @@ const router = express_1.default.Router();
  *     security:
  *       - bearerAuth: []
  */
-router.post("/", authenticate_1.authenticate, cloudinary_1.upload.fields([{ name: "thumbnail", maxCount: 1 }, { name: "overviewVideo", maxCount: 1 }]), (0, validateRequest_1.validateRequest)(course_validation_1.createCourseZodSchema), course_controller_1.courseController.createCourse);
+router.post("/", authenticate_1.authenticate, 
+// validateRequest(createCourseZodSchema),
+cloudinary_1.upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "overviewVideo", maxCount: 1 },
+]), course_controller_1.courseController.createCourse);
 /**
  * @swagger
  * /api/courses:
@@ -113,7 +116,7 @@ router.get("/author/:authorId", authenticate_1.authenticate, course_controller_1
  *     security:
  *       - bearerAuth: []
  */
-router.patch("/:id/delete", authenticate_1.authenticate, course_controller_1.courseController.softDeleteCourseById);
+router.delete("/:id/delete", authenticate_1.authenticate, course_controller_1.courseController.softDeleteCourseById);
 /**
  * @swagger
  * /api/courses/{id}/restore:

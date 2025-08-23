@@ -21,7 +21,7 @@ const createLesson = (0, catchAsyncHandler_1.catchAsyncHandler)((req, res) => __
     var _a;
     const files = req.files;
     const videoFile = (_a = files === null || files === void 0 ? void 0 : files.video) === null || _a === void 0 ? void 0 : _a[0];
-    const body = Object.assign(Object.assign({}, req.body), { video: videoFile === null || videoFile === void 0 ? void 0 : videoFile.path, videoPublicId: videoFile === null || videoFile === void 0 ? void 0 : videoFile.filename });
+    const body = Object.assign(Object.assign({}, req.body), { video: videoFile === null || videoFile === void 0 ? void 0 : videoFile.path });
     const lesson = yield lession_service_1.lessonService.createLessonIntoDB(body);
     (0, sendResponse_1.sendResponse)(res, { statusCode: 201, success: true, message: "Lesson created successfully", data: lesson });
 }));

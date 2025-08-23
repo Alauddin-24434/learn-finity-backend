@@ -64,7 +64,7 @@ auth_controller_1.AuthController.login // Call controller
  *       200: { description: Access token refreshed successfully }
  *       401: { description: Invalid or expired refresh token }
  */
-router.get("/refresh-token", auth_controller_1.AuthController.refreshAccessToken);
+router.post("/refresh-token", auth_controller_1.AuthController.refreshAccessToken);
 /**
  * @swagger
  * /api/auth/logout:

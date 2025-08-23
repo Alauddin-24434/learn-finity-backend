@@ -23,7 +23,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.lessonService = void 0;
 const prisma_1 = require("../lib/prisma");
 const AppError_1 = require("../error/AppError");
-const cloudinary_1 = require("../lib/cloudinary");
 /**
  * @desc Create a new lesson in the database.
  *        If DB creation fails, delete uploaded video from Cloudinary (rollback).
@@ -32,25 +31,14 @@ const cloudinary_1 = require("../lib/cloudinary");
  * @throws Throws error if DB operation fails
  */
 const createLessonIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    let videoPublicId = payload.videoPublicId;
-    try {
-        return yield prisma_1.prisma.lesson.create({
-            data: {
-                title: payload.title,
-                duration: payload.duration,
-                courseId: payload.courseId,
-                video: payload.video,
-                videoPublicId,
-            },
-        });
-    }
-    catch (err) {
-        // Rollback uploaded video if DB creation fails
-        if (videoPublicId) {
-            yield cloudinary_1.cloudinary.uploader.destroy(videoPublicId, { resource_type: "video" });
-        }
-        throw err;
-    }
+    return yield prisma_1.prisma.lesson.create({
+        data: {
+            title: payload.title,
+            duration: payload.duration,
+            courseId: payload.courseId,
+            video: payload.video,
+        },
+    });
 });
 /**
  * @desc Get all lessons (excluding soft-deleted)

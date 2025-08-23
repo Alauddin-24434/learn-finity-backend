@@ -76,6 +76,7 @@ const loginUser = (loginData) => __awaiter(void 0, void 0, void 0, function* () 
             email: true,
             isAdmin: true,
             password: true,
+            avatar: true,
         },
     });
     if (!user)
