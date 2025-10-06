@@ -12,7 +12,7 @@ export const setupSwagger = (app: Application) => {
         description: "API documentation for Learning Platform",
       },
       servers: [
-        { url: "https://learning-platform-backend-production-839d.up.railway.app", description: "Production server" },
+        { url: "https://learn-finity-backend-production.up.railway.app", description: "Production server" },
         { url: "http://localhost:5000", description: "Local development server" },
         // Add more servers if needed
       ],
