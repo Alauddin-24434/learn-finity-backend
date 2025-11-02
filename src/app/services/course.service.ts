@@ -47,20 +47,20 @@ const getCourseById = async (id: string, userId: string) => {
   const course = await prisma.course.findUnique({
     where: { id, isDeleted: false }, // ✅ only active courses
     include: {
-      author: true,
+      // author: true,
       category: true,
       lessons: true,
-      enrollments: { where: { userId }, select: { id: true } },
+   
     },
   });
   if (!course) throw new AppError(404, "Course not found");
 
-  const { lessons, enrollments, ...rest } = course;
+  const { lessons,  ...rest } = course;
   return {
     ...rest,
     lessonsCount: lessons.length,
     enrollmentsCount: await prisma.enrollment.count({ where: { courseId: id } }),
-    isEnrolled: enrollments.length > 0,
+    
   };
 };
 

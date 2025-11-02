@@ -64,8 +64,13 @@ const deleteUser = async (id: string) => {
   return { message: "User deleted successfully" }
 }
 
+
+
+
 export const userService = {
   getAllUsers,
   updateUser,
   deleteUser,
 }
+
+

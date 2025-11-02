@@ -66,16 +66,15 @@ const getCourseById = (id, userId) => __awaiter(void 0, void 0, void 0, function
     const course = yield prisma_1.prisma.course.findUnique({
         where: { id, isDeleted: false }, // ✅ only active courses
         include: {
-            author: true,
+            // author: true,
             category: true,
             lessons: true,
-            enrollments: { where: { userId }, select: { id: true } },
         },
     });
     if (!course)
         throw new AppError_1.AppError(404, "Course not found");
-    const { lessons, enrollments } = course, rest = __rest(course, ["lessons", "enrollments"]);
-    return Object.assign(Object.assign({}, rest), { lessonsCount: lessons.length, enrollmentsCount: yield prisma_1.prisma.enrollment.count({ where: { courseId: id } }), isEnrolled: enrollments.length > 0 });
+    const { lessons } = course, rest = __rest(course, ["lessons"]);
+    return Object.assign(Object.assign({}, rest), { lessonsCount: lessons.length, enrollmentsCount: yield prisma_1.prisma.enrollment.count({ where: { courseId: id } }) });
 });
 /**
  * @desc Get all courses with filters, pagination, sorting

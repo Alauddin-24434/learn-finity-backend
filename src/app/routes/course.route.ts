@@ -83,7 +83,7 @@ router.get("/", courseController.getAllCourses);
  *     security:
  *       - bearerAuth: []
  */
-router.get("/:id", authenticate, courseController.getCourseById);
+router.get("/:id",  courseController.getCourseById);
 
 /**
  * @swagger

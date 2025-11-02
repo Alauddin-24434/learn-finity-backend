@@ -57,7 +57,8 @@ const loginUser = async (loginData: ILoginUser) => {
       email: true,
       isAdmin: true,
       password: true,
-      avatar:true,
+      avatar: true,
+      courseEnrollments:true
     },
   })
   if (!user) throw new AppError(400, "Invalid email or password")
