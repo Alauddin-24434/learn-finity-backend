@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  courses   Course[]
+  isDeleted Boolean  @default(false)
+}
+
+model Course {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  thumbnail       String
+  overviewUrl     String?
+  price           Int
+  isFree          Boolean
+  categoryId      String
+  authorId        String
+
+  // Relationships
+  Videos          Video[]
+  reviews         Review[]
+  category        Category     @relation(fields: [categoryId], references: [id])
+
+  // ✅ New fields for better structure
+  tags            String[] @default([])      // searchable tags
+  features        String[] @default([])      // course highlights
+  overviews       String[] @default([])      // course outline summary
+  stack           String[] @default([])      // tech stack (e.g., React, Node, etc.)
+  isDeleted       Boolean  @default(false)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // ✅ Relation with course progress (optional)
+  progresses      CourseProgress[]
+}
+
+model Video {
+  id            String   @id @default(cuid())
+  title         String
+  duration      Int
+  url           String
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id])
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  isDeleted     Boolean  @default(false)
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  courseId    String
+  userId      String
+  ratings     Int
+  comment     String
+  createdAt   DateTime @default(now())
+  course      Course   @relation(fields: [courseId], references: [id])
+  isDeleted   Boolean  @default(false)
+}
+
+model CourseProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  completedLessons Int @default(0)
+  totalLessons     Int @default(0)
+  progressPercent  Float @default(0)
+  lastAccessedAt   DateTime @default(now())
+
+  // Relation with course
+  course      Course   @relation(fields: [courseId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

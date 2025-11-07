@@ -1,0 +1,50 @@
+import { z } from "zod";
+export declare const courseSchema: z.ZodObject<{
+    id: z.ZodOptional<z.ZodString>;
+    title: z.ZodString;
+    description: z.ZodString;
+    thumbnail: z.ZodString;
+    overviewUrl: z.ZodString;
+    price: z.ZodNumber;
+    isFree: z.ZodBoolean;
+    categoryId: z.ZodString;
+    authorId: z.ZodString;
+    tags: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    features: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    overviews: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    stack: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    isDeleted: z.ZodDefault<z.ZodBoolean>;
+    createdAt: z.ZodOptional<z.ZodDate>;
+    updatedAt: z.ZodOptional<z.ZodDate>;
+}, z.core.$strip>;
+export declare const createCourseSchema: z.ZodObject<{
+    title: z.ZodString;
+    description: z.ZodString;
+    thumbnail: z.ZodString;
+    overviewUrl: z.ZodString;
+    price: z.ZodNumber;
+    isFree: z.ZodBoolean;
+    categoryId: z.ZodString;
+    authorId: z.ZodString;
+    tags: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    features: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    overviews: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    stack: z.ZodDefault<z.ZodArray<z.ZodString>>;
+    isDeleted: z.ZodDefault<z.ZodBoolean>;
+}, z.core.$strip>;
+export declare const updateCourseSchema: z.ZodObject<{
+    title: z.ZodOptional<z.ZodString>;
+    description: z.ZodOptional<z.ZodString>;
+    thumbnail: z.ZodOptional<z.ZodString>;
+    overviewUrl: z.ZodOptional<z.ZodString>;
+    price: z.ZodOptional<z.ZodNumber>;
+    isFree: z.ZodOptional<z.ZodBoolean>;
+    categoryId: z.ZodOptional<z.ZodString>;
+    authorId: z.ZodOptional<z.ZodString>;
+    tags: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    features: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    overviews: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    stack: z.ZodOptional<z.ZodDefault<z.ZodArray<z.ZodString>>>;
+    isDeleted: z.ZodOptional<z.ZodDefault<z.ZodBoolean>>;
+}, z.core.$strip>;
+//# sourceMappingURL=course.validations.d.ts.map

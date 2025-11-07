@@ -1,0 +1,1 @@
+{"version":3,"file":"cookieOptions.js","sourceRoot":"","sources":["../../src/utils/cookieOptions.ts"],"names":[],"mappings":";;;AACA,sCAAuC;AAE1B,QAAA,aAAa,GAAkB;IAC1C,QAAQ,EAAE,IAAI;IACd,MAAM,EAAE,oBAAW,CAAC,QAAQ,KAAK,YAAY;IAC7C,QAAQ,EAAE,KAAK;IACf,MAAM,EAAE,CAAC,GAAG,EAAE,GAAG,EAAE,GAAG,EAAE,GAAG,IAAI,EAAE,yBAAyB;CAC3D,CAAA"}
