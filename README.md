@@ -60,14 +60,6 @@ Make sure you have the following installed:
 
 2.  **Install dependencies:**
 
-    This project uses `pnpm` for package management. If you don't have it, install it globally:
-
-    ```bash
-    npm install -g pnpm
-    ```
-
-    Then, install the project dependencies:
-
     ```bash
     pnpm install
     ```
