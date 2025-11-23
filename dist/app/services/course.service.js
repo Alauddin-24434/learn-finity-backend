@@ -45,13 +45,13 @@ const createCourse = (data) => __awaiter(void 0, void 0, void 0, function* () {
             thumbnail: data.thumbnail,
             overviewVideo: data.overviewVideo,
             price: Number(data.price),
-            isFree: data.isFree ? true : false,
             description: data.description,
             authorId: data.authorId,
             categoryId: data.categoryId,
             features: data.features,
             stack: data.stack,
             overviews: data.overviews,
+            level: data.level
         },
     });
 });
@@ -74,7 +74,9 @@ const getCourseById = (id, userId) => __awaiter(void 0, void 0, void 0, function
     if (!course)
         throw new AppError_1.AppError(404, "Course not found");
     const { lessons } = course, rest = __rest(course, ["lessons"]);
-    return Object.assign(Object.assign({}, rest), { lessonsCount: lessons.length, enrollmentsCount: yield prisma_1.prisma.enrollment.count({ where: { courseId: id } }) });
+    return Object.assign(Object.assign({}, rest), { lessonsCount: lessons.length, enrollmentsCount: yield prisma_1.prisma.enrollment.count({
+            where: { courseId: id },
+        }) });
 });
 /**
  * @desc Get all courses with filters, pagination, sorting
@@ -147,7 +149,9 @@ const getCoursesByAuthor = (authorId) => __awaiter(void 0, void 0, void 0, funct
  */
 const updateCourseById = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("data1", data);
-    const course = yield prisma_1.prisma.course.findUnique({ where: { id, isDeleted: false } });
+    const course = yield prisma_1.prisma.course.findUnique({
+        where: { id, isDeleted: false },
+    });
     if (!course)
         throw new AppError_1.AppError(404, "Course not found");
     return prisma_1.prisma.course.update({ where: { id }, data });

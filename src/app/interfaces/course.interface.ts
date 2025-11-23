@@ -11,6 +11,5 @@ export interface ICourse {
   features: string[];
   overviews: string[];
   stack: string[];
-
-
+  level: "BEGINNER" | "INTERMEDIATE" | "ADVANCED"
 }

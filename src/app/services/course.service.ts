@@ -17,7 +17,11 @@ const createCourse = async (data: ICourse) => {
       isDeleted: false, // prevent duplicate check on deleted course
     },
   });
-  if (exists) throw new AppError(400, "Course with this title already exists for this author");
+  if (exists)
+    throw new AppError(
+      400,
+      "Course with this title already exists for this author"
+    );
 
   return prisma.course.create({
     data: {
@@ -25,13 +29,13 @@ const createCourse = async (data: ICourse) => {
       thumbnail: data.thumbnail,
       overviewVideo: data.overviewVideo,
       price: Number(data.price),
-      isFree: data.isFree ? true : false,
       description: data.description,
       authorId: data.authorId,
       categoryId: data.categoryId,
       features: data.features,
       stack: data.stack,
       overviews: data.overviews,
+      level: data.level
     },
   });
 };
@@ -50,17 +54,17 @@ const getCourseById = async (id: string, userId: string) => {
       // author: true,
       category: true,
       lessons: true,
-   
     },
   });
   if (!course) throw new AppError(404, "Course not found");
 
-  const { lessons,  ...rest } = course;
+  const { lessons, ...rest } = course;
   return {
     ...rest,
     lessonsCount: lessons.length,
-    enrollmentsCount: await prisma.enrollment.count({ where: { courseId: id } }),
-    
+    enrollmentsCount: await prisma.enrollment.count({
+      where: { courseId: id },
+    }),
   };
 };
 
@@ -142,8 +146,10 @@ const getCoursesByAuthor = async (authorId: string) => {
  * @throws AppError if course not found or deleted
  */
 const updateCourseById = async (id: string, data: ICourse) => {
-  console.log("data1",data)
-  const course = await prisma.course.findUnique({ where: { id, isDeleted: false } });
+  console.log("data1", data);
+  const course = await prisma.course.findUnique({
+    where: { id, isDeleted: false },
+  });
   if (!course) throw new AppError(404, "Course not found");
 
   return prisma.course.update({ where: { id }, data });

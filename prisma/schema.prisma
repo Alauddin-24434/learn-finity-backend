@@ -9,6 +9,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  
 }
 
 // User model for managing user data and authentication.
@@ -50,7 +51,6 @@ model Course {
   thumbnail             String
   overviewVideo         String
   price                 Int    
-  isFree                Boolean 
   categoryId            String
   authorId              String
 
@@ -67,6 +67,7 @@ model Course {
   author      User         @relation("CreatedCourses", fields: [authorId], references: [id])
   // Relation to the course's category.
   category    Category     @relation(fields: [categoryId], references: [id])
+  level       CourseLevel?
 
   isDeleted Boolean @default(false)
 
@@ -146,7 +147,7 @@ model Review {
   ratings   Int
   comment   String
   createdAt DateTime @default(now())
-
+  
   // Relation to the course being reviewed.
   course    Course  @relation(fields: [courseId], references: [id])
   isDeleted Boolean @default(false)
@@ -158,4 +159,11 @@ enum PaymentStatus {
   PAID
   FAILED
   CANCELLED
+}
+
+ enum CourseLevel {
+  BEGINNER 
+  INTERMEDIATE
+  ADVANCED
+  PREMIUM 
 }
