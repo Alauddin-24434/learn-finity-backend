@@ -20,7 +20,8 @@ const createReview = async (payload: IReview) => {
 
 const getReviewByCourseId = async (courseId:string,) => {
     const result = await prisma.review.findMany({
-        where: {courseId}
+        where: { courseId },
+        select:{userId: true}
     })
     if (!result) {
         throw new AppError(404, "Review Not Found")

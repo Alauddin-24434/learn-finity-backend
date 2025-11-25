@@ -25,10 +25,10 @@ const createReview = catchAsyncHandler(async (req: Request, res: Response) => {
 const getReviewByCourseId = catchAsyncHandler(async (req: Request, res: Response) => {
   const { courseId } = req.query as { courseId?: string};
 
-  if (!courseId) {
+  if (!courseId) { 
     return res.status(400).json({
       success: false,
-      message: "courseId and userId are required",
+      message: "courseId is required",
     });
   }
 
