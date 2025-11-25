@@ -9,6 +9,7 @@ const lession_route_1 = require("../routes/lession.route");
 const category_route_1 = require("../routes/category.route");
 const enrollment_route_1 = require("../routes/enrollment.route");
 const overview_route_1 = require("../routes/overview.route");
+const review_route_1 = require("../routes/review.route");
 const moduleRoutes = [
     {
         path: "/api/auth",
@@ -41,6 +42,10 @@ const moduleRoutes = [
     {
         path: "/api/overviews",
         route: overview_route_1.dashboardRoute,
+    },
+    {
+        path: "/api/reviews",
+        route: review_route_1.reviewRoutes,
     },
 ];
 const initialRoute = (app) => {
