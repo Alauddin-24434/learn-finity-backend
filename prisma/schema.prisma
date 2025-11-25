@@ -32,6 +32,7 @@ model User {
   payments          Payment[]
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
+  reviews   Review[]  
 }
 
 // Category model for organizing courses.
@@ -150,6 +151,7 @@ model Review {
   
   // Relation to the course being reviewed.
   course    Course  @relation(fields: [courseId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
   isDeleted Boolean @default(false)
 }
 
